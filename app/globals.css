@@ -984,10 +984,6 @@ body {
     width: 1.3rem;
   }
 
-  .studyHeroIcons {
-    display: none;
-  }
-
   .stats > div:nth-child(odd) {
     border-inline-start: 1px solid var(--border);
   }
@@ -1021,14 +1017,13 @@ body { background:var(--bg); color:var(--navy); }
   background:linear-gradient(112deg,#2553fa 5%,#3a6aff 53%,#89b0ff 100%);
   border:0; border-radius:26px; color:white; box-shadow:0 16px 36px rgba(37,83,250,.18);
 }
-.studyHero:before { content:''; position:absolute; inset:0; z-index:-1; background:url('/reading-hero.svg') right center / auto 100% no-repeat; opacity:.98; }
 .studyHero:after { content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#2753f8 0%,rgba(40,87,249,.96) 34%,rgba(50,96,247,.3) 72%,transparent);border-radius:inherit; }
 .studyHeroCopy { position:relative; z-index:1; max-width:650px; }
 .studyHero h1 { color:#fff; font-weight:800; text-shadow:0 2px 9px #1539b033; }
 .studyHero p { color:#edf4ff; font-size:1rem; }
 .studyHeroActions :is(a,button){ border-radius:14px; min-height:48px; background:#fff; color:#244be0; box-shadow:0 6px 17px #1233a426; }
 .studyHeroActions a { background:#dfe9ff; }
-.studyHeroIcons { display:none; }
+.studyHeroIcons { display:grid; }
 .stats { gap:13px; }
 .stats>div { border:1px solid #e7ebff; border-radius:19px; background:white; box-shadow:0 9px 24px rgba(28,61,132,.04);padding:22px; }
 .stats strong { color:#233d81; }
@@ -1068,7 +1063,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .sidebar nav { gap:5px; }
  .sidebar nav button { border-radius:12px; }
  .studyHero { min-height:235px;padding:25px 20px; border-radius:22px; }
- .studyHero:before { background-size:auto 100%;background-position:right center;opacity:.46; }
  .studyHero:after { background:linear-gradient(90deg,#2857fa 10%,rgba(42,87,250,.9) 60%,rgba(45,92,247,.15)); }
  .studyHero h1 { font-size:1.9rem; }
  .studyHero p { font-size:.9rem;max-width:230px; }
@@ -1083,13 +1077,46 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   box-shadow: none;
 }
 
-.studyHeroActions a[href="#reading-skills"] {
+.studyHeroActions button {
   background: #dff68b;
   color: #202b58;
 }
 
-.studyHeroActions a[href="#reading-skills"]:hover {
+.studyHeroActions a {
+  background: #fff;
+}
+
+.studyHeroActions :is(button, a):hover {
   background: #eaf9ad;
+}
+
+.studyHeroIcons {
+  padding-inline: 0 clamp(0rem, 2vw, 1rem);
+}
+
+@media (max-width: 600px) {
+  .studyHero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .studyHeroIcons {
+    grid-template-columns: repeat(3, auto);
+    gap: .45rem;
+  }
+
+  .studyHeroIcons span,
+  .studyHeroIcons span:first-child {
+    grid-row: auto;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: .65rem;
+  }
+
+  .studyHeroIcons svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
 }
 
 .dailyReviewLink {
