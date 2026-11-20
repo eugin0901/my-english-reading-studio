@@ -21,23 +21,23 @@ function IconTile({ background, size, children }) {
 export default function OpenGraphImage() {
   return new ImageResponse(
     <div style={{
-      display: 'flex', width: '100%', height: '100%', padding: 32, background: '#f3f4ff',
+      display: 'flex', width: '100%', height: '100%', padding: 32, background: '#eef2ff',
     }}>
       <div style={{
         display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
         width: '100%', padding: '54px 72px', borderRadius: 44, color: '#fff',
-        backgroundImage: 'linear-gradient(112deg, #292da8 0%, #303ec5 58%, #4556dd 100%)',
+        backgroundImage: 'linear-gradient(112deg, #2549e9 0%, #365df0 58%, #6589ff 100%)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <IconTile background="#dff68b" size={72}>
             <path d="M12 7v14m0-14c-2-2-4-3-9-3v14c5 0 7 1 9 3 2-2 4-3 9-3V4c-5 0-7 1-9 3Z"/>
           </IconTile>
-          <div style={{ fontSize: 29, fontWeight: 700 }}>Reading Studio</div>
+          <div style={{ fontSize: 29, fontWeight: 700 }}>ReadingStudio</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
           <div style={{ fontSize: 68, fontWeight: 700, lineHeight: 1.04 }}>My English</div>
           <div style={{ fontSize: 88, fontWeight: 700, lineHeight: 1.04 }}>Reading Studio</div>
-          <div style={{ fontSize: 29, color: '#ebedff', marginTop: 18 }}>Read, translate, and speak.</div>
+          <div style={{ fontSize: 29, color: '#ebedff', marginTop: 18 }}>Read. Learn. Review. Grow.</div>
         </div>
         <div style={{ display: 'flex', gap: 14 }}>
           <IconTile background="#dff68b" size={88}>
