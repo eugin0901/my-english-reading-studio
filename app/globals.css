@@ -992,3 +992,87 @@ body {
     border-inline-start: 1px solid var(--border);
   }
 }
+
+
+/* ReadingStudio 2026 blue learning experience — presentational only */
+:root {
+  --navy:#15254b;
+  --mint:#315bff;
+  --bg:#f6f8ff;
+  --border:#e4eafd;
+  --muted:#65738e;
+}
+body { background:var(--bg); color:var(--navy); }
+.sidebar { background:#fff; border-right:1px solid #e5eaf8; box-shadow:4px 0 25px rgba(29,54,125,.025); }
+.sidebar .brand { color:#182b59; font-weight:800; }
+.logo { background:linear-gradient(145deg,#2859ff,#6379ff); border-radius:13px; box-shadow:0 8px 18px #2859ff30; }
+.sidebar nav button { border-radius:13px; transition:background .16s ease,transform .16s ease; }
+.sidebar nav button:hover { transform:translateX(2px); }
+.sidebar nav button.active,.sidebar nav button:hover { background:#eaf0ff;color:#224ce5; box-shadow:none; }
+.navIcon { background:#edf2ff;color:#315bff; }
+.sidebar nav button.active .navIcon { background:#315bff;color:#fff; }
+.topbar { background:rgba(255,255,255,.92); }
+.topbar .today { background:#e8efff;color:#2954e3;font-weight:800; }
+.pageBody { max-width:1240px; }
+.heading h1 { color:#172b58; font-size:clamp(1.75rem,3vw,2.35rem); }
+.eyebrow { color:#365df1; }
+.studyHero {
+  position:relative; min-height:275px; isolation:isolate;
+  background:linear-gradient(112deg,#2553fa 5%,#3a6aff 53%,#89b0ff 100%);
+  border:0; border-radius:26px; color:white; box-shadow:0 16px 36px rgba(37,83,250,.18);
+}
+.studyHero:before { content:''; position:absolute; inset:0; z-index:-1; background:url('/reading-hero.svg') right center / auto 100% no-repeat; opacity:.98; }
+.studyHero:after { content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#2753f8 0%,rgba(40,87,249,.96) 34%,rgba(50,96,247,.3) 72%,transparent);border-radius:inherit; }
+.studyHeroCopy { position:relative; z-index:1; max-width:650px; }
+.studyHero h1 { color:#fff; font-weight:800; text-shadow:0 2px 9px #1539b033; }
+.studyHero p { color:#edf4ff; font-size:1rem; }
+.studyHeroActions :is(a,button){ border-radius:14px; min-height:48px; background:#fff; color:#244be0; box-shadow:0 6px 17px #1233a426; }
+.studyHeroActions a { background:#dfe9ff; }
+.studyHeroIcons { display:none; }
+.stats { gap:13px; }
+.stats>div { border:1px solid #e7ebff; border-radius:19px; background:white; box-shadow:0 9px 24px rgba(28,61,132,.04);padding:22px; }
+.stats strong { color:#233d81; }
+.stats span svg,.sourcePanel label svg { color:#4268f7; }
+.panel { border-radius:20px; border-color:#e4eafb; box-shadow:0 9px 30px rgba(28,61,132,.035); }
+.panelHead { background:linear-gradient(180deg,#fff,#fafbff); }
+.panelHead svg { color:#315bff; }
+.primary { background:#315bff; border-radius:13px; box-shadow:0 7px 17px #315bff20; }
+.primary:hover:not(:disabled) { background:#214ae8; }
+.secondary { background:#edf2ff; color:#3150c5; border-color:#dae3ff; border-radius:12px; }
+.bubble.user { background:#ebf1ff; color:#213c83; }
+.bubble.assistant { background:#f4f7ff; color:#1b2d51; }
+.term { border-radius:16px; background:#fff;box-shadow:0 6px 22px #3359af0a; }
+.pill { background:#eaf0ff; color:#315bff; font-weight:750; }
+.options button { border-radius:13px; }
+.options button:hover,.options button.picked { background:#eff3ff; border-color:#315bff; }
+.qNum,.greenDot,.empty svg,.submitted svg { color:#315bff; }
+.readingBookPanel { border-color:#e0e9ff; }
+.readingAssessment .panelHead,.readingExercise .panelHead,.tutorTable th { background:#eef3ff; color:#2143ac; }
+.scoreCard,.success { background:#eaf0ff; color:#284fe0; }
+.progressBar div { background:#4467ff; }
+.dailyReviewLink { background:#eaf0ff;border-color:#dbe5ff;color:#3150c5; }
+.dailyReviewLink:hover { background:#dee9ff; }
+.login { background:linear-gradient(125deg,#eef3ff,#f9fbff); }
+.loginCard,.signInLayout .loginCard { border-color:#e3eaff; border-radius:25px; box-shadow:0 17px 48px #2448ba14; }
+.signInIntro { background:linear-gradient(135deg,#244ff0,#7c9fff) !important; position:relative; isolation:isolate; overflow:hidden; }
+.signInIntro:after { content:'';position:absolute;inset:0;z-index:-1;background:url('/reading-hero.svg') center bottom / cover no-repeat;opacity:.25; }
+.signInIntro .brand,.signInIntro h2 { color:white; }
+.signInIntro p { color:#ecf2ff; }
+.loginCard h1 { color:#182c57; }
+.bubble.assistant :is(h1,h2,h3,h4){color:#274ec5;}
+.shadowing,.sourcePanel { border-color:#d9e5ff; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:3px solid #82a2ff;outline-offset:2px; }
+@media (max-width:760px){
+ .pageBody { padding:20px 15px 100px; }
+ .sidebar { padding:12px 14px; }
+ .sidebar nav { gap:5px; }
+ .sidebar nav button { border-radius:12px; }
+ .studyHero { min-height:235px;padding:25px 20px; border-radius:22px; }
+ .studyHero:before { background-size:auto 100%;background-position:right center;opacity:.46; }
+ .studyHero:after { background:linear-gradient(90deg,#2857fa 10%,rgba(42,87,250,.9) 60%,rgba(45,92,247,.15)); }
+ .studyHero h1 { font-size:1.9rem; }
+ .studyHero p { font-size:.9rem;max-width:230px; }
+ .stats { gap:9px; }
+ .stats>div { padding:16px 14px;border-radius:15px; }
+ .signInIntro:after { opacity:.16; }
+}
