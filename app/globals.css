@@ -1179,3 +1179,56 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .sidebar .brand span:after { font-size:15px; }
   .sidebarBottom>button { font-size:11px;padding:8px; }
 }
+
+
+/* ReadingStudio / bright learning-first home */
+.studyHero {
+  background:linear-gradient(122deg,#2549e9 0%,#365df0 55%,#6589ff 100%);
+  box-shadow:0 22px 48px #294bd42b;
+  min-height:310px; border-radius:28px; position:relative; overflow:hidden;
+  padding:clamp(26px,4vw,52px);
+}
+.studyHero:before {
+  content:"";position:absolute;right:-6%;bottom:-26%;width:56%;height:120%;
+  background:radial-gradient(ellipse at 55% 70%,#bbd0ff70,transparent 68%);
+  pointer-events:none;
+}
+.studyHeroCopy {z-index:2;max-width:620px;}
+.heroKicker { display:inline-flex;align-items:center;gap:9px;letter-spacing:.13em;
+  font-size:11px;font-weight:800;color:#dce8ff;margin-bottom:17px; }
+.heroSpark { color:#e0f787;font-size:18px; }
+.studyHero h1 { font-size:clamp(32px,4vw,52px);line-height:1.18;letter-spacing:-.05em; margin:0 0 14px; }
+.studyHero p {font-size:clamp(13px,1.3vw,16px);line-height:1.75;max-width:430px;margin:0 0 25px;}
+.studyHeroActions { gap:10px; }
+.studyHeroActions button { background:#e0f78d; color:#1e2c63; box-shadow:0 8px 22px #1c38ab29; }
+.studyHeroActions button.heroSecondary { background:#fff;color:#3157d7; }
+.studyHeroActions button:hover,.studyHeroActions button.heroSecondary:hover {
+ background:#f2f9d7;transform:translateY(-1px);
+}
+.studyHeroIcons { align-items:center; justify-content:center; transform:rotate(-6deg); position:relative; }
+.studyHeroIcons span:first-child {
+ background:#f1f5ff; color:#3461ea;border-radius:25px;
+ box-shadow:0 17px 32px #102dad42;
+}
+.studyHeroIcons span:nth-child(2){background:#e0f78d;color:#283b90;}
+.studyHeroIcons span:nth-child(3){background:#dee5ff;color:#365af0;}
+.stats>div {transition:box-shadow .2s, transform .2s;}
+.stats>div:hover {transform:translateY(-2px);box-shadow:0 14px 32px #244dc016;}
+.stats strong { color:#172e74; }
+.stats span { color:#687897; }
+.stats span svg {color:#4167f7;}
+.panel,.term {box-shadow:0 10px 30px #294bbb0a;}
+.panelHead {background:#fff;}
+.loginCard {box-shadow:0 18px 52px #234fd01c;}
+@media (max-width:760px) {
+ .studyHero {min-height:0;padding:27px 22px 29px;border-radius:23px;}
+ .studyHero h1 {font-size:clamp(29px,8vw,37px);}
+ .studyHero p {max-width:320px;font-size:13px;}
+ .studyHeroActions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;}
+ .studyHeroActions button {justify-content:center;min-height:48px;padding:9px 7px;font-size:12px;}
+ .studyHeroIcons {display:none;}
+ .stats>div {border-radius:17px;}
+}
+@media (max-width:380px) {
+ .studyHeroActions {grid-template-columns:1fr;}
+}
