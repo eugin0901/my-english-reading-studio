@@ -310,3 +310,12 @@
   outline: 2px solid #184c42;
   outline-offset: 3px;
 }
+
+.assessmentFeedback h3 {
+  margin: .75rem 0;
+  font-size: 1rem;
+}
+
+.assessmentFeedback table {
+  min-width: 28rem;
+}

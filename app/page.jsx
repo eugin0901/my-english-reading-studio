@@ -322,7 +322,20 @@ export default function Page(){
     <div><dt>내 해석</dt><dd>{readingAssessment.translation}</dd></div>
     <div><dt>자연스러운 해석</dt><dd>{readingAssessment.naturalTranslation}</dd></div>
    </dl>
-   <button type="button" className="secondary" onClick={() => setTab('skills')}>오늘의 읽기 기술 연습하기</button>
+   {!!readingAssessment.feedbackRows?.length && <div className="assessmentFeedback">
+    <h3 id="assessment-feedback-title">무엇을 잘 읽었을까?</h3>
+    <div className="tutorTable" tabIndex={0} role="region" aria-labelledby="assessment-feedback-title">
+     <table aria-labelledby="assessment-feedback-title">
+      <thead><tr>
+       <th scope="col">표현</th><th scope="col">내 이해</th><th scope="col">평가</th><th scope="col">자연스러운 해석</th>
+      </tr></thead>
+      <tbody>{readingAssessment.feedbackRows.map((row, index) => <tr key={index}>
+       <td lang="en">{row.expression}</td><td>{row.understanding}</td>
+       <td>{row.evaluation}</td><td>{row.translation}</td>
+      </tr>)}</tbody>
+     </table>
+    </div>
+   </div>}
   </div>
  </section>}
   {chatPanel}
