@@ -1048,9 +1048,16 @@ body { background:var(--bg); color:var(--navy); }
 .dailyReviewLink:hover { background:#dee9ff; }
 .login { background:linear-gradient(125deg,#eef3ff,#f9fbff); }
 .loginCard,.signInLayout .loginCard { border-color:#e3eaff; border-radius:25px; box-shadow:0 17px 48px #2448ba14; }
-.signInIntro { background:linear-gradient(135deg,#244ff0,#7c9fff) !important; position:relative; isolation:isolate; overflow:hidden; }
+.signInIntro { background:linear-gradient(112deg, #292da8 0%, #303ec5 58%, #4556dd 100%); position:relative; isolation:isolate; overflow:hidden; }
 .signInIntro:after { content:'';position:absolute;inset:0;z-index:-1;background:url('/reading-hero.svg') center bottom / cover no-repeat;opacity:.25; }
 .signInIntro .brand,.signInIntro h2 { color:white; }
+.signInLayout .loginCard .primary {
+  background: #303ec5;
+  box-shadow: 0 7px 17px #303ec520;
+}
+.signInLayout .loginCard .primary:hover:not(:disabled) {
+  background: #292da8;
+}
 .signInIntro p { color:#ecf2ff; }
 .loginCard h1 { color:#182c57; }
 .bubble.assistant :is(h1,h2,h3,h4){color:#274ec5;}
