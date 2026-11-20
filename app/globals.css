@@ -44,3 +44,49 @@
 .bubble.assistant blockquote > :last-child {
   margin-bottom: 0;
 }
+
+.bubble.assistant blockquote:has(> h4:first-child) {
+  padding: 1rem 1.125rem;
+  border: 1px solid #c6dfd7;
+  border-radius: .75rem;
+  background: #fff;
+}
+
+.bubble.assistant blockquote > h4:first-child {
+  margin: 0 0 .15rem;
+  font-size: .875rem;
+}
+
+.bubble.assistant blockquote > h4:first-child + p > strong:first-child {
+  font-size: 1.5rem;
+  color: #184c42;
+}
+
+.tutorTable {
+  overflow-x: auto;
+  border: 1px solid #c6dfd7;
+  border-radius: .65rem;
+  background: #fff;
+}
+
+.tutorTable table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+  overflow-wrap: normal;
+}
+
+.tutorTable :is(th, td) {
+  padding: .55rem .65rem;
+  text-align: start;
+  vertical-align: top;
+}
+
+.tutorTable th {
+  background: #e7f4ef;
+  color: #184c42;
+}
+
+.tutorTable td {
+  border-top: 1px solid #e3ece8;
+}
