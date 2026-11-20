@@ -250,11 +250,14 @@ export default function Page(){
  <TutorReply content={m.content}/>
  {tab === 'study' && i === exerciseReplyIndex && <div className="tutorPracticePreview">
   <h3>오늘의 읽기 기술 · {readingExercise.skill}</h3>
-  <p lang="en"><strong>{readingExercise.example}</strong></p>
   <h4>해석 연습</h4>
-  <p>{readingExercise.tip} 그런 다음 예문을 자연스러운 한국어로 옮겨 보세요.</p>
+  <ol lang="en">{[readingExercise.example, ...(readingExercise.extraReadingExamples || [])].map((sentence, index) =>
+   <li key={index}>{sentence}</li>)}</ol>
+  <p>{readingExercise.tip} 첫 번째 예문을 복습 화면에서 자연스러운 한국어로 옮겨 보세요.</p>
   <h4>작문 연습</h4>
   <p><strong lang="en">{readingExercise.expression}</strong>를 사용해 새로운 영어 문장을 써 보세요. {readingExercise.compositionTip}</p>
+  <ol lang="en">{readingExercise.writingExamples?.map((sentence, index) =>
+   <li key={index}>{sentence}</li>)}</ol>
   <a href="#reading-skills" className="dailyReviewLink">
    <RefreshCw size={18} aria-hidden="true"/>
    <span>오늘의 한 문장 복습</span>
