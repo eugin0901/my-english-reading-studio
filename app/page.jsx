@@ -4,7 +4,7 @@ import Markdown from 'react-markdown';
 import Shadowing from './shadowing';
 import remarkGfm from 'remark-gfm';
 import {createClient} from '@supabase/supabase-js';
-import {BookCopy,BookOpen,Headphones,PencilLine,Activity,MessageSquareText,ClipboardCheck,LibraryBig,ChartNoAxesColumnIncreasing,Send,RefreshCw,LogOut,CheckCircle2,AlertCircle} from 'lucide-react';
+import {BookCopy,BookOpen,Headphones,PencilLine,Activity,MessageSquareText,ClipboardCheck,LibraryBig,ChartNoAxesColumnIncreasing,Send,RefreshCw,LogOut,CheckCircle2,AlertCircle,House,Target,Trophy,UserCircle2,ArrowRight} from 'lucide-react';
 
 const tutorMarkup = ['p', 'h1', 'h2', 'h3', 'h4', 'strong', 'em', 'ul', 'ol', 'li', 'blockquote', 'br', 'code', 'del', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td'];
 
@@ -38,11 +38,12 @@ function noteWeekLabel(start) {
  return start + ' ~ ' + (start.slice(0, 4) === last.slice(0, 4) ? last.slice(5) : last);
 }
 export default function Page(){
- const [session,setSession]=useState(null),[email,setEmail]=useState(''),[linkSent,setLinkSent]=useState(false),[tab,setTab]=useState('study');
+ const [session,setSession]=useState(null),[email,setEmail]=useState(''),[linkSent,setLinkSent]=useState(false),[tab,setTab]=useState('home');
  const [kakaoBusy, setKakaoBusy] = useState(false);
  const [data,setData]=useState(empty),[busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState(''),[quizId,setQuizId]=useState(''),[answers,setAnswers]=useState({}),[result,setResult]=useState(null);
  const [bookId, setBookId] = useState('');
  const [bookFilter, setBookFilter] = useState('all');
+ const [reviewWrongOnly, setReviewWrongOnly] = useState(false);
  const [weekFilter, setWeekFilter] = useState('all');
  const [bookTitle, setBookTitle] = useState('');
  const [addingBook, setAddingBook] = useState(false);
@@ -74,7 +75,7 @@ export default function Page(){
     setError('');
     window.scrollTo(0, 0);
    } else if (event?.oldURL?.endsWith('#reading-skills')) {
-    setTab('study');
+    setTab('home');
    }
   }
   syncReadingSkills();
@@ -87,6 +88,7 @@ export default function Page(){
    window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
   }
   setTab(nextTab);
+  window.scrollTo({top: 0, behavior: 'instant'});
  }
 
  const token=session?.access_token;
@@ -109,7 +111,7 @@ export default function Page(){
    setError(failure.message);
   }
  }
- useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setBookId('');setBookFilter('all');setWeekFilter('all');setBookTitle('');setAddingBook(false);setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);setReadingAssessment(null);setExerciseTranslation('');setExerciseComposition('');}},[token]);
+ useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setBookId('');setBookFilter('all');setReviewWrongOnly(false);setWeekFilter('all');setBookTitle('');setAddingBook(false);setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);setReadingAssessment(null);setExerciseTranslation('');setExerciseComposition('');}},[token]);
  useEffect(() => {
   if (replyVersion) latestReply.current?.scrollIntoView({ block: 'start' });
  }, [replyVersion]);
@@ -281,7 +283,7 @@ export default function Page(){
  const weeks = [...new Set(data.terms.flatMap(term =>
   term.placements.filter(matchesBook).map(placement => placement.week_start)))].sort().reverse();
  const filteredTerms = data.terms.filter(term => term.placements.some(placement =>
-  matchesBook(placement) && (weekFilter === 'all' || placement.week_start === weekFilter)));
+  matchesBook(placement) && (weekFilter === 'all' || placement.week_start === weekFilter)) && (!reviewWrongOnly || term.wrong_count > 0));
  const selected=data.quizzes.find(q=>q.id===quizId)||data.quizzes[0];
  const already=selected&&data.attempts.find(a=>a.quiz_id===selected.id);
  const stats={books:data.books.length,terms:data.terms.length,quizzes:data.attempts.length,score:data.attempts.length?Math.round(data.attempts.reduce((a,b)=>a+b.score,0)/data.attempts.length):0};
@@ -323,7 +325,36 @@ export default function Page(){
  </div>}
  </> : m.content}</div></div>)}{busy&&<div className="thinking">답변을 준비하고 학습 표현을 정리하는 중...</div>}</div><form className="compose" onSubmit={ask}><input value={message} disabled={busy} onChange={e=>setMessage(e.target.value)} aria-label="AI 원서 선생님에게 질문" placeholder="문장이나 표현에 대해 질문하세요" maxLength={2000}/><button className="primary send" type="submit" aria-label="질문 보내기" disabled={busy||!message.trim()}><Send size={18} aria-hidden="true"/></button></form><p className="note">학습 대화와 주요 영어 표현은 로그인 계정에 저장됩니다. 개인 비밀번호 등 민감정보는 입력하지 마세요.</p></section>
  );
- return <div className="app"><aside className="sidebar"><div className="brand"><div className="logo"><BookOpen size={20}/></div><span>My English Reading Studio</span></div><nav aria-label="학습 메뉴">{[['study',BookOpen,'영어 원서 공부'],['skills',BookOpen,'오늘의 읽기 기술'],['quiz',ClipboardCheck,'주간 복습시험'],['terms',LibraryBig,'단어·표현 노트'],['progress',ChartNoAxesColumnIncreasing,'학습 성적']].map(([id,Icon,label])=><button key={id} className={tab===id?'active':''} aria-current={tab===id ? 'page' : undefined} onClick={()=>{selectTab(id);setError('');setResult(null);setAnswers({});}}><span className="navIcon"><Icon size={19} aria-hidden="true"/></span>{label}</button>)}</nav><div className="sidebarBottom"><div className="profile"><div className="avatar">{session.user.email?.[0]?.toUpperCase()||'U'}</div><div><strong>{session.user.email || session.user.user_metadata?.name || "내 계정"}</strong></div></div><button onClick={()=>client().auth.signOut()}><LogOut size={16}/> 로그아웃</button></div></aside><main className="content"><div className="pageBody">
+ return <div className="app"><aside className="sidebar"><div className="brand"><div className="logo"><BookOpen size={20}/></div><span>ReadingStudio</span></div><nav aria-label="학습 메뉴">{[['home',House,'홈'],['study',BookOpen,'영어 원서 공부'],['skills',BookOpen,'오늘의 읽기 기술'],['quiz',ClipboardCheck,'주간 복습시험'],['terms',LibraryBig,'단어·표현 노트'],['progress',ChartNoAxesColumnIncreasing,'학습 성적']].map(([id,Icon,label])=><button key={id} className={tab===id?'active':''} aria-current={tab===id ? 'page' : undefined} onClick={()=>{selectTab(id);setError('');setResult(null);setAnswers({});if(id==='terms')setReviewWrongOnly(false);}}><span className="navIcon"><Icon size={19} aria-hidden="true"/></span>{label}</button>)}</nav><div className="sidebarBottom"><div className="profile"><div className="avatar">{session.user.email?.[0]?.toUpperCase()||'U'}</div><div><strong>{session.user.email || session.user.user_metadata?.name || "내 계정"}</strong></div></div><button onClick={()=>client().auth.signOut()}><LogOut size={16}/> 로그아웃</button></div></aside><main className="content"><header className="mobileAppHeader"><div className="mobileBrand"><div className="logo"><BookOpen size={23}/></div><span>ReadingStudio</span></div><button type="button" className="mobileProfile" aria-label="로그아웃" title="로그아웃" onClick={()=>client().auth.signOut()}><UserCircle2 size={28}/></button></header><div className="pageBody">
+ {tab==='home' && <section className="homeDashboard" aria-label="학습 홈">
+  <div className="homeIntro">
+   <p className="homeEyebrow">MY ENGLISH JOURNEY</p>
+   <h1>오늘도 영어 원서 한 페이지!</h1>
+   <p>읽고, 기억하고, 실력이 쌓이는 시간</p>
+  </div>
+  <section className="weeklyChallenge" aria-labelledby="weekly-title">
+   <div className="challengeKicker">WEEKLY CHALLENGE</div>
+   <div className="challengeTitle"><h2 id="weekly-title">이번 주 복습시험</h2><Trophy size={37} aria-hidden="true"/></div>
+   <p>나만의 표현으로 만들어진 10문제</p>
+   <button type="button" className="challengeAction" onClick={()=>selectTab('quiz')}>시험 시작하기 <ArrowRight size={22} aria-hidden="true"/></button>
+  </section>
+  <div className="homeQuickCards">
+   <button type="button" className="homeQuickCard" onClick={()=>{setReviewWrongOnly(false);selectTab('terms');}}>
+    <LibraryBig size={29} aria-hidden="true"/><strong>나의 표현 노트</strong><span>배운 단어와 숙어 모음</span>
+   </button>
+   <button type="button" className="homeQuickCard" onClick={()=>{setReviewWrongOnly(true);setBookFilter('all');setWeekFilter('all');selectTab('terms');}}>
+    <Target size={29} aria-hidden="true"/><strong>오답 집중 복습</strong><span>틀린 표현 다시 도전</span>
+   </button>
+  </div>
+  <section className="homeSnapshot" aria-label="나의 학습 현황"><div className="snapshotTitle">나의 학습 현황</div><div className="snapshotGrid">
+   <div><span>학습 원서</span><strong>{stats.books}<small>권</small></strong></div>
+   <div><span>학습 표현</span><strong>{stats.terms}<small>개</small></strong></div>
+   <div><span>완료한 시험</span><strong>{stats.quizzes}<small>회</small></strong></div>
+   <div><span>평균 점수</span><strong>{stats.score}<small>점</small></strong></div>
+  </div></section>
+  {error && <div className="error" role="alert"><AlertCircle size={16}/>{error}<button onClick={()=>setError('')}>닫기</button></div>}
+  <button type="button" className="homeStudyLink" onClick={()=>selectTab('study')}><BookOpen size={20}/> 오늘의 원서 공부 시작하기 <ArrowRight size={19}/></button>
+ </section>}
  {tab === 'study' ? <header className="studyHero">
   <div className="studyHeroCopy">
    <div className="heroKicker"><span className="heroSpark">✦</span> YOUR READING JOURNEY</div>
@@ -481,7 +512,7 @@ export default function Page(){
  {tab==='quiz'&&<section className="panel"><div className="panelHead"><div><ClipboardCheck size={19}/><strong>복습시험</strong></div><button className="secondary" onClick={generate} disabled={busy}><RefreshCw size={15}/>{busy?'생성 중...':'이번 주 시험 만들기'}</button></div>{!data.quizzes.length?<div className="empty"><BookOpen size={34}/><h3>아직 시험이 없습니다.</h3><p>영어 공부를 시작한 후 ‘이번 주 시험 만들기’를 눌러 보세요.<br/>매주 일요일에도 자동 생성됩니다.</p></div>:<><div className="quizSelect"><label>시험 선택</label><select value={selected?.id||''} onChange={e=>{setQuizId(e.target.value);setAnswers({});setResult(null);}}>{data.quizzes.map(q=><option value={q.id} key={q.id}>{q.week_key} · {q.title}</option>)}</select></div>{already&&!result?<div className="submitted"><CheckCircle2 size={24}/><h3>이미 응시한 시험입니다.</h3><p>점수: <strong>{already.score}점</strong> · 다른 주의 시험을 선택하거나 학습 성적 탭을 확인하세요.</p></div>:result?<div className="results"><div className="scoreCard"><CheckCircle2 size={28}/><span>이번 시험 점수</span><strong>{result.score}<small> / 100</small></strong></div>{result.detail.map((d,i)=><div className={'answerCard '+(d.correct?'correct':'wrong')} key={i}><b>{i+1}. {d.stem}</b><p>{d.correct?'✓ 정답입니다.':'✗ 오답입니다.'} 정답: {selected.questions[i].options[d.correctIndex]}</p><div>{d.explanation}</div></div>)}</div>:<div className="questions">{selected.questions.map((q,i)=><div className="question" key={i}><div className="qNum">문제 {i+1}</div><h3>{q.stem}</h3><div className="options">{q.options.map((o,j)=><button key={j} className={answers[i]===j?'picked':''} onClick={()=>setAnswers(a=>({...a,[i]:j}))}><span>{'ABCD'[j]}</span>{o}</button>)}</div></div>)}<button className="primary submit" onClick={submit} disabled={busy}>시험 제출하고 채점받기</button></div>}</>}</section>}
  {tab==='terms'&&<section className="panel">
   <div className="panelHead"><div><LibraryBig size={19}/><strong>단어·표현 노트</strong></div><span className="pill">{filteredTerms.length}개</span></div>
-  <div className="bookPanel">
+  <div className="bookPanel"><div className="termMode"><button type="button" className={!reviewWrongOnly?'active':''} onClick={()=>setReviewWrongOnly(false)}>전체 표현</button><button type="button" className={reviewWrongOnly?'active':''} onClick={()=>setReviewWrongOnly(true)}>오답 집중 복습</button></div>
    <label htmlFor="book-filter">원서별 보기</label>
    <select id="book-filter" value={bookFilter} onChange={event => { setBookFilter(event.target.value); setWeekFilter('all'); }}>
     <option value="all">전체</option>
@@ -515,5 +546,5 @@ export default function Page(){
    })}</div>}
  </section>}
  {tab==='progress'&&<section className="panel"><div className="panelHead"><div><ChartNoAxesColumnIncreasing size={19}/><strong>학습 이력</strong></div></div>{!data.attempts.length?<div className="empty"><ChartNoAxesColumnIncreasing size={32}/><p>첫 주간 복습시험을 마치면 점수가 여기에 기록됩니다.</p></div>:<div className="history">{data.attempts.map((a,i)=><div className="historyRow" key={i}><span>{new Date(a.created_at).toLocaleDateString('ko-KR')}</span><div className="progressBar"><div style={{width:`${a.score}%`}}/></div><strong>{a.score}점</strong><small>오답 {a.wrong_expressions?.length||0}개</small></div>)}</div>}</section>}
- <footer className="appFoot">My English Reading Studio · Private learning space</footer></div></main></div>;
+ <footer className="appFoot">My English Reading Studio · Private learning space</footer></div><nav className="mobileBottomNav" aria-label="모바일 주요 메뉴">{[['home',House,'홈'],['terms',LibraryBig,'표현 노트'],['quiz',ClipboardCheck,'시험'],['progress',ChartNoAxesColumnIncreasing,'성적']].map(([id,Icon,label])=><button key={id} type="button" className={tab===id?'active':''} aria-current={tab===id?'page':undefined} onClick={()=>{selectTab(id);setError('');if(id==='terms')setReviewWrongOnly(false);}}><Icon size={23} aria-hidden="true"/><span>{label}</span></button>)}</nav></main></div>;
 }
