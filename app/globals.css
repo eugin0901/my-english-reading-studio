@@ -429,3 +429,280 @@
   opacity: .65;
   cursor: wait;
 }
+
+/* A quiet reading surface with emphasis on the current task. */
+:root {
+  --navy: #212b28;
+  --mint: #176456;
+  --bg: #f7f8f5;
+  --border: #dce3dc;
+  --muted: #52625b;
+}
+
+body {
+  line-height: 1.55;
+}
+
+.sidebar {
+  width: 226px;
+  padding: 25px 16px;
+  background: #f0f3ed;
+}
+
+.sidebar .brand {
+  padding: 0 6px;
+  font-size: .95rem;
+  line-height: 1.35;
+}
+
+.logo {
+  flex-shrink: 0;
+  border-radius: 9px;
+}
+
+.sidebar nav {
+  margin-top: 2.2rem;
+  gap: .25rem;
+}
+
+.sidebar nav button {
+  border-radius: 6px;
+  font-size: .9rem;
+  padding: .65rem .7rem;
+  color: #43554d;
+}
+
+.sidebar nav button :is(svg) {
+  flex-shrink: 0;
+}
+
+.sidebar nav button:hover,
+.sidebar nav button.active {
+  background: #e2ece4;
+  color: #19493d;
+}
+
+.sidebar nav button.active {
+  box-shadow: inset 3px 0 0 var(--mint);
+}
+
+.profile strong {
+  overflow-wrap: anywhere;
+  font-size: .8rem;
+}
+
+.pageBody {
+  max-width: 1010px;
+  padding: clamp(1.5rem, 4vw, 3.25rem) clamp(1rem, 4vw, 3rem) 2rem;
+}
+
+.heading h1 {
+  font-size: clamp(1.7rem, 3vw, 2.25rem);
+  letter-spacing: -.035em;
+  margin-bottom: .4rem;
+}
+
+.heading > p:last-child {
+  font-size: .95rem;
+  margin-bottom: 1.4rem;
+}
+
+.stats {
+  gap: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.stats > div {
+  border: 0;
+  border-radius: 0;
+  padding: .9rem clamp(.7rem, 2vw, 1.3rem);
+}
+
+.stats > div + div {
+  border-inline-start: 1px solid var(--border);
+}
+
+.stats span,
+.stats small {
+  font-size: .8rem;
+}
+
+.stats strong {
+  font-size: 1.55rem;
+  line-height: 1.25;
+}
+
+.panel {
+  border-radius: 10px;
+}
+
+.panelHead {
+  height: auto;
+  min-height: 3.6rem;
+  gap: .75rem;
+  padding-block: .65rem;
+}
+
+.panelHead > div {
+  font-size: 1rem;
+}
+
+.readingBookPanel {
+  background: #e1eee5;
+}
+
+.sourcePanel {
+  background: #f0f7f2;
+}
+
+.sourcePanel .readingPractice {
+  max-width: none;
+}
+
+.sourcePanel textarea,
+.practiceSentence textarea {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+#reading-source,
+.practiceEnglish,
+.assessmentBody dd[lang="en"] {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.125rem;
+}
+
+.secondary {
+  min-height: 2.4rem;
+  font-size: .85rem;
+  border-radius: 6px;
+}
+
+.primary {
+  border-radius: 6px;
+}
+
+:is(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
+}
+
+.welcome h2 {
+  font-size: 1rem;
+  margin-bottom: .7rem;
+}
+
+.suggestions button {
+  border-radius: 6px;
+  font-size: .8rem;
+  color: #31584d;
+}
+
+.chat:has(.welcome):not(:has(.bubbleRow)) {
+  height: auto;
+  min-height: 10rem;
+}
+
+.bubble.assistant {
+  width: 100%;
+  max-width: 100%;
+  padding-inline: 0;
+  background: transparent;
+  color: var(--navy);
+}
+
+.compose input {
+  font-size: 1rem;
+}
+
+.note {
+  font-size: .8rem;
+  color: var(--muted);
+}
+
+.login {
+  background: var(--bg);
+  padding: 1.25rem;
+}
+
+.login > .brand {
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.loginCard {
+  box-shadow: none;
+  border-radius: 10px;
+  width: min(26rem, 100%);
+}
+
+.loginCard h1 {
+  line-height: 1.25;
+  margin-bottom: .65rem;
+}
+
+.loginCard > p:not(.eyebrow),
+.loginCard label {
+  font-size: .9rem;
+}
+
+.loginCard form {
+  margin-top: .55rem;
+}
+
+.loginCard small {
+  color: var(--muted);
+  font-size: .8rem;
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: .7rem .75rem .35rem;
+  }
+
+  .sidebar nav {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    margin-top: .65rem;
+  }
+
+  .sidebar nav button {
+    font-size: .85rem;
+    min-height: 2.75rem;
+  }
+
+  .sidebar nav button.active {
+    box-shadow: inset 0 -2px 0 var(--mint);
+  }
+
+  .sidebarBottom {
+    display: block;
+    grid-row: 1;
+    grid-column: 2;
+    margin: 0;
+  }
+
+  .sidebarBottom .profile {
+    display: none;
+  }
+
+  .sidebarBottom > button {
+    padding: .55rem;
+  }
+
+  .stats > div:nth-child(odd) {
+    border-inline-start: 0;
+  }
+
+  .stats > div:nth-child(n+3) {
+    border-top: 1px solid var(--border);
+  }
+}
