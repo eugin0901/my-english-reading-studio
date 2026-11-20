@@ -57,6 +57,28 @@ export default function Page(){
   const {data:{subscription}}=auth.onAuthStateChange((_event,next)=>setSession(next));
   return()=>subscription.unsubscribe();
  },[]);
+ useEffect(() => {
+  function syncReadingSkills(event) {
+   if (window.location.hash === '#reading-skills') {
+    setTab('skills');
+    setError('');
+    window.scrollTo(0, 0);
+   } else if (event?.oldURL?.endsWith('#reading-skills')) {
+    setTab('study');
+   }
+  }
+  syncReadingSkills();
+  window.addEventListener('hashchange', syncReadingSkills);
+  return () => window.removeEventListener('hashchange', syncReadingSkills);
+ }, []);
+
+ function selectTab(nextTab) {
+  if (nextTab !== 'skills' && window.location.hash === '#reading-skills') {
+   window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
+  }
+  setTab(nextTab);
+ }
+
  const token=session?.access_token;
  async function api(path,method='GET',payload){
   if(!token) throw new Error('로그인 상태를 확인해 주세요.');
@@ -224,7 +246,7 @@ export default function Page(){
  const chatPanel = (
  <section className="panel studyPanel"><div className="panelHead"><div><MessageSquareText size={19}/><strong>AI 원서 선생님</strong></div></div><div className="chat">{data.messages.length===0&&<div className="welcome"><div className="welcomeIcon"><BookOpen size={26}/></div><h2>무엇을 읽고 있나요?</h2><p>읽다가 모르는 단어나 문장을 그대로 입력해 보세요.<br/>예: “I didn't understand her feelings until she explained them.” 에서 until의 의미는?</p><div className="suggestions">{['It wasn’t that I disliked my job. 해석해줘','take time off와 get away from 차이','Ivy and Bean 문장 구조를 설명해줘'].map(s=><button key={s} onClick={()=>setMessage(s)}>{s}</button>)}</div></div>}{data.messages.map((m,i)=><div className={'bubbleRow '+(m.role==='user'?'mine':'')} key={m.id||i} ref={i === latestReplyIndex ? latestReply : null}><div className={'bubble '+m.role}>{m.role === 'assistant' ? <TutorReply content={m.content}/> : m.content}</div></div>)}{busy&&<div className="thinking">답변을 준비하고 학습 표현을 정리하는 중...</div>}</div><form className="compose" onSubmit={ask}><input value={message} disabled={busy} onChange={e=>setMessage(e.target.value)} placeholder="공부하고 싶은 단어·문장·질문을 입력하세요..." maxLength={2000}/><button className="primary send" type="submit" disabled={busy||!message.trim()}><Send size={18}/></button></form><p className="note">학습 대화와 주요 영어 표현은 로그인 계정에 저장됩니다. 개인 비밀번호 등 민감정보는 입력하지 마세요.</p></section>
  );
- return <div className="app"><aside className="sidebar"><div className="brand"><div className="logo"><BookOpen size={20}/></div><span>Reading<br/>Studio</span></div><div className="sideLabel">MY WORKSPACE</div><nav>{[['study',BookOpen,'영어 원서 공부'],['skills',BookOpen,'오늘의 읽기 기술'],['quiz',ClipboardCheck,'주간 복습시험'],['terms',LibraryBig,'단어·표현 노트'],['progress',ChartNoAxesColumnIncreasing,'학습 성적']].map(([id,Icon,label])=><button key={id} className={tab===id?'active':''} onClick={()=>{setTab(id);setError('');setResult(null);setAnswers({});}}><Icon size={19}/>{label}</button>)}</nav><div className="sidebarBottom"><div className="profile"><div className="avatar">{session.user.email?.[0]?.toUpperCase()||'U'}</div><div><strong>My Study Space</strong><small>{session.user.email}</small></div></div><button onClick={()=>client().auth.signOut()}><LogOut size={16}/> 로그아웃</button></div></aside><main className="content"><header className="topbar"><span><GraduationCap size={19}/> Your English journey</span><span className="today">매주 일요일 10:00 KST · 자동 시험</span></header><div className="pageBody"><div className="heading"><p className="eyebrow">YOUR PERSONAL LEARNING SPACE</p><h1>{tab==='study'?'오늘도 한 문장씩, 꾸준하게.':tab==='skills'?'오늘의 읽기 기술':tab==='quiz'?'이번 주 영어 복습시험':tab==='terms'?'나의 영어 표현 노트':'학습 성장 기록'}</h1><p>{tab==='study'?'영어 원서에서 궁금한 문장을 입력하세요. 배운 표현은 자동으로 저장됩니다.':tab==='skills'?'예문을 해석하고 핵심 표현으로 새 문장을 써 보세요.':tab==='quiz'?'학습한 표현과 이전 오답을 바탕으로 10문제를 풀어보세요.':tab==='terms'?'AI 선생님과 공부하며 수집된 표현입니다.':'시험 응시 결과와 학습한 표현을 확인하세요.'}</p></div><div className="stats"><div><span>누적 학습 표현</span><strong>{stats.terms}<small>개</small></strong></div><div><span>완료한 시험</span><strong>{stats.quizzes}<small>회</small></strong></div><div><span>평균 점수</span><strong>{stats.score}<small>점</small></strong></div></div>{error&&<div className="error"><AlertCircle size={16}/>{error}<button onClick={()=>setError('')}>닫기</button></div>}
+ return <div className="app"><aside className="sidebar"><div className="brand"><div className="logo"><BookOpen size={20}/></div><span>Reading<br/>Studio</span></div><div className="sideLabel">MY WORKSPACE</div><nav>{[['study',BookOpen,'영어 원서 공부'],['skills',BookOpen,'오늘의 읽기 기술'],['quiz',ClipboardCheck,'주간 복습시험'],['terms',LibraryBig,'단어·표현 노트'],['progress',ChartNoAxesColumnIncreasing,'학습 성적']].map(([id,Icon,label])=><button key={id} className={tab===id?'active':''} onClick={()=>{selectTab(id);setError('');setResult(null);setAnswers({});}}><Icon size={19}/>{label}</button>)}</nav><div className="sidebarBottom"><div className="profile"><div className="avatar">{session.user.email?.[0]?.toUpperCase()||'U'}</div><div><strong>My Study Space</strong><small>{session.user.email}</small></div></div><button onClick={()=>client().auth.signOut()}><LogOut size={16}/> 로그아웃</button></div></aside><main className="content"><header className="topbar"><span><GraduationCap size={19}/> Your English journey</span><span className="today">매주 일요일 10:00 KST · 자동 시험</span></header><div className="pageBody"><div className="heading"><p className="eyebrow">YOUR PERSONAL LEARNING SPACE</p><h1>{tab==='study'?'오늘도 한 문장씩, 꾸준하게.':tab==='skills'?'오늘의 읽기 기술':tab==='quiz'?'이번 주 영어 복습시험':tab==='terms'?'나의 영어 표현 노트':'학습 성장 기록'}</h1><p>{tab==='study'?'영어 원서에서 궁금한 문장을 입력하세요. 배운 표현은 자동으로 저장됩니다.':tab==='skills'?'예문을 해석하고 핵심 표현으로 새 문장을 써 보세요.':tab==='quiz'?'학습한 표현과 이전 오답을 바탕으로 10문제를 풀어보세요.':tab==='terms'?'AI 선생님과 공부하며 수집된 표현입니다.':'시험 응시 결과와 학습한 표현을 확인하세요.'}</p></div><div className="stats"><div><span>누적 학습 표현</span><strong>{stats.terms}<small>개</small></strong></div><div><span>완료한 시험</span><strong>{stats.quizzes}<small>회</small></strong></div><div><span>평균 점수</span><strong>{stats.score}<small>점</small></strong></div></div>{error&&<div className="error"><AlertCircle size={16}/>{error}<button onClick={()=>setError('')}>닫기</button></div>}
  {tab==='study'&&<div className="studySections">
  <section className="panel bookPanel readingBookPanel">
   <label className="readingBookLabel" htmlFor="reading-book"><BookCopy size={19} aria-hidden="true"/><strong>원서 제목</strong></label>
@@ -304,14 +326,10 @@ export default function Page(){
   </div>
  </section>}
   {chatPanel}
-  <button type="button" className="dailyReviewLink" onClick={() => {
-   setTab('skills');
-   setError('');
-   window.scrollTo(0, 0);
-  }}>
+  <a href="#reading-skills" className="dailyReviewLink" style={{textDecoration: 'none'}}>
    <RefreshCw size={20} aria-hidden="true"/>
    <span>오늘의 한 문장 복습</span>
-  </button>
+  </a>
  </div>}
  {tab === 'skills' && <div className="studySections">
   {readingExercise ? <section className="panel readingExercise" aria-labelledby="reading-skill-title">
@@ -345,7 +363,7 @@ export default function Page(){
    <section className="panel"><div className="empty">
     <BookOpen size={32}/>
     <p>원서 문장을 해석하고 평가받으면 여기에 읽기 기술과 연습 문제가 생깁니다.</p>
-    <button type="button" className="secondary" onClick={() => setTab('study')}>원서 공부로 가기</button>
+    <button type="button" className="secondary" onClick={() => selectTab('study')}>원서 공부로 가기</button>
    </div></section>}
   {chatPanel}
  </div>}
