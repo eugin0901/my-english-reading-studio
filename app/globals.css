@@ -219,3 +219,49 @@
   align-items: center;
   gap: .5rem;
 }
+
+.readingAssessment {
+  border-color: #c6dfd7;
+  scroll-margin-block-start: 1rem;
+}
+.readingAssessment .panelHead {
+  background: #e7f4ef;
+  color: #184c42;
+}
+.readingAssessment h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+.assessmentBody {
+  padding: 1.25rem clamp(1rem, 3vw, 1.75rem);
+}
+.assessmentScore strong {
+  font-size: 2rem;
+  line-height: 1.2;
+  color: #184c42;
+}
+.assessmentScore span,
+.assessmentNote {
+  color: #47665d;
+}
+.assessmentNote {
+  margin: .25rem 0 1rem;
+  font-size: .875rem;
+}
+.assessmentBody dl,
+.assessmentBody dd {
+  margin: 0;
+}
+.assessmentBody dl > div {
+  padding: .75rem 0;
+  border-top: 1px solid #e3ece8;
+}
+.assessmentBody dt {
+  font-weight: 700;
+  margin-bottom: .3rem;
+}
+.assessmentBody dd {
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

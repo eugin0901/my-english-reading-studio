@@ -8,7 +8,7 @@ export async function POST(request) {
   let operation = 'study.auth';
   try {
     const {user,db} = await requireUser(request);
-    const {message, bookId} = (await request.json().catch(() => null)) || {};
+    const {message, bookId, readingAssessment} = (await request.json().catch(() => null)) || {};
     if (typeof message !== 'string' || message.trim().length < 1 || message.length > 2000) return Response.json({error:'메시지는 1~2000자로 작성해 주세요.'},{status:400});
     if (bookId != null) {
       if (!isUuid(bookId)) return Response.json({error:'올바른 원서를 선택해 주세요.'},{status:400});
@@ -23,7 +23,7 @@ export async function POST(request) {
     const {data:recent,error:rerr} = await db.from('messages').select('role,content').eq('user_id',user.id).order('created_at',{ascending:false}).limit(12);
     if (rerr) throw rerr;
     operation = 'study.openai';
-    const result = await teach((recent||[]).reverse(),message.trim());
+    const result = await teach((recent||[]).reverse(),message.trim(), readingAssessment === true);
     operation = 'study.save';
     const terms = [...new Map(result.terms.map(term => {
       const expression = term.expression.trim().slice(0, 120);
@@ -44,6 +44,6 @@ export async function POST(request) {
       }
       throw error;
     }
-    return Response.json({answer:result.answer,terms});
+    return Response.json({answer:result.answer,terms, ...(result.assessment ? { assessment: result.assessment } : {})});
   } catch(e) { return jsonError(e, operation); }
 }
