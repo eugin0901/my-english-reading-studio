@@ -174,3 +174,36 @@
 .readingHints p {
   margin: .4rem 0 0;
 }
+
+.bookPanel {
+  display: grid;
+  gap: .65rem;
+  padding: 1rem clamp(1rem, 3vw, 2rem);
+}
+.bookControls {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+.bookControls > :is(select, input) {
+  flex: 1;
+  min-width: 0;
+}
+.bookControls button {
+  flex-shrink: 0;
+}
+.bookPanel :is(input, select),
+.term select {
+  width: 100%;
+  padding: .6rem;
+  border: 1px solid #a9c5ba;
+  border-radius: .45rem;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+}
+.term .termBooks {
+  margin: .6rem 0;
+  color: #385c51;
+  overflow-wrap: anywhere;
+}

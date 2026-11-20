@@ -34,10 +34,15 @@ function client(){
  if(!supabase) supabase=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
  return supabase;
 }
-const empty={messages:[],terms:[],quizzes:[],attempts:[]};
+const empty={messages:[],terms:[],quizzes:[],attempts:[],books:[]};
 export default function Page(){
  const [session,setSession]=useState(null),[email,setEmail]=useState(''),[linkSent,setLinkSent]=useState(false),[tab,setTab]=useState('study');
  const [data,setData]=useState(empty),[busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState(''),[quizId,setQuizId]=useState(''),[answers,setAnswers]=useState({}),[result,setResult]=useState(null);
+ const [bookId, setBookId] = useState('');
+ const [bookFilter, setBookFilter] = useState('all');
+ const [bookTitle, setBookTitle] = useState('');
+ const [addingBook, setAddingBook] = useState(false);
+ const [bookBusy, setBookBusy] = useState(false);
  const [sourceText, setSourceText] = useState('');
  const [ownTranslation, setOwnTranslation] = useState('');
  const ownSource = sourceText.trim();
@@ -75,11 +80,45 @@ export default function Page(){
    setError(failure.message);
   }
  }
- useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);setTranslations(practiceSentences.map(() => ''));}},[token]);
+ useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setBookId('');setBookFilter('all');setBookTitle('');setAddingBook(false);setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);setTranslations(practiceSentences.map(() => ''));}},[token]);
  useEffect(() => {
   if (replyVersion) latestReply.current?.scrollIntoView({ block: 'start' });
  }, [replyVersion]);
  async function signIn(e){e.preventDefault();setBusy(true);setError('');try{const {error}=await client().auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin}});if(error)throw error;setLinkSent(true);}catch(e){setError(e.message);}finally{setBusy(false);}}
+ async function createBook(event) {
+  event.preventDefault();
+  if (bookBusy || !bookTitle.trim()) return;
+  setBookBusy(true);
+  setError('');
+  try {
+   const { book } = await api('/api/books', 'POST', { title: bookTitle });
+   setData(current => ({ ...current, books: [...current.books, book] }));
+   setBookId(book.id);
+   setBookTitle('');
+   setAddingBook(false);
+  } catch (failure) {
+   setError(failure.message);
+  } finally {
+   setBookBusy(false);
+  }
+ }
+
+ async function linkTerm(termId, selectedBookId) {
+  if (bookBusy || !selectedBookId) return;
+  setBookBusy(true);
+  setError('');
+  try {
+   await api('/api/books', 'PATCH', { termId, bookId: selectedBookId });
+   setData(current => ({ ...current, terms: current.terms.map(term =>
+    term.id === termId ? { ...term, bookIds: [...new Set([...term.bookIds, selectedBookId])] } : term
+   ) }));
+  } catch (failure) {
+   setError(failure.message);
+  } finally {
+   setBookBusy(false);
+  }
+ }
+
  async function sendStudy(input) {
   if (!input || busy) return false;
   const sequence = ++studySequence.current;
@@ -90,7 +129,7 @@ export default function Page(){
    ...current, messages: [...current.messages, { role: 'user', content: input, id: pendingId }],
   }));
   try {
-   const reply = await api('/api/study', 'POST', { message: input });
+   const reply = await api('/api/study', 'POST', { message: input, ...(bookId ? { bookId } : {}) });
    setData(current => ({
     ...current,
     messages: [
@@ -146,12 +185,36 @@ export default function Page(){
  async function generate(){setBusy(true);setError('');try{await api('/api/quiz/generate','POST',{});await reload();setTab('quiz');}catch(e){setError(e.message);}finally{setBusy(false);}}
  async function submit(){const q=selected;if(!q)return;const vals=q.questions.map((_,i)=>answers[i]);if(vals.some(x=>!Number.isInteger(x))){setError('모든 문제에 답해 주세요.');return;}setBusy(true);setError('');try{const r=await api('/api/quiz/submit','POST',{quizId:q.id,answers:vals});setResult(r);await reload();}catch(e){setError(e.message);}finally{setBusy(false);}}
  const latestReplyIndex = data.messages.map(item => item.role).lastIndexOf('assistant');
+ const books = data.books;
+ const bookTitles = new Map(books.map(book => [book.id, book.title]));
+ const filteredTerms = data.terms.filter(term => {
+  if (bookFilter === 'all') return true;
+  return bookFilter === 'unfiled' ? !term.bookIds.length : term.bookIds.includes(bookFilter);
+ });
  const selected=data.quizzes.find(q=>q.id===quizId)||data.quizzes[0];
  const already=selected&&data.attempts.find(a=>a.quiz_id===selected.id);
  const stats={terms:data.terms.length,quizzes:data.attempts.length,score:data.attempts.length?Math.round(data.attempts.reduce((a,b)=>a+b.score,0)/data.attempts.length):0};
  if(!session)return <main className="login"><div className="brand"><div className="logo"><BookOpen/></div> MY ENGLISH READING STUDIO</div><div className="loginCard"><p className="eyebrow">PERSONAL READING COMPANION</p><h1>읽을수록 쌓이는<br/><span>나만의 영어 실력</span></h1><p>AI 영어 선생님과 원서를 공부하면 표현이 자동 저장되고, 매주 일요일 새 복습시험이 만들어집니다.</p><form onSubmit={signIn}><label>이메일 로그인</label><input type="email" placeholder="you@example.com" required value={email} onChange={e=>setEmail(e.target.value)}/><button className="primary" disabled={busy}>{busy?'전송 중...':'로그인 링크 받기'}</button></form>{linkSent&&<div className="success">이메일에서 로그인 링크를 눌러 주세요.</div>}{error&&<p className="err">{error}</p>}<small>로그인 링크는 Supabase 이메일 인증을 사용합니다. 서비스 배포 후 이메일 인증 설정이 필요합니다.</small></div><div className="footer">Study with intention · Review with confidence</div></main>;
  return <div className="app"><aside className="sidebar"><div className="brand"><div className="logo"><BookOpen size={20}/></div><span>Reading<br/>Studio</span></div><div className="sideLabel">MY WORKSPACE</div><nav>{[['study',MessageSquareText,'영어 원서 공부'],['quiz',ClipboardCheck,'주간 복습시험'],['terms',LibraryBig,'단어·표현 노트'],['progress',ChartNoAxesColumnIncreasing,'학습 성적']].map(([id,Icon,label])=><button key={id} className={tab===id?'active':''} onClick={()=>{setTab(id);setError('');setResult(null);setAnswers({});}}><Icon size={19}/>{label}</button>)}</nav><div className="sidebarBottom"><div className="profile"><div className="avatar">{session.user.email?.[0]?.toUpperCase()||'U'}</div><div><strong>My Study Space</strong><small>{session.user.email}</small></div></div><button onClick={()=>client().auth.signOut()}><LogOut size={16}/> 로그아웃</button></div></aside><main className="content"><header className="topbar"><span><GraduationCap size={19}/> Your English journey</span><span className="today">매주 일요일 10:00 KST · 자동 시험</span></header><div className="pageBody"><div className="heading"><p className="eyebrow">YOUR PERSONAL LEARNING SPACE</p><h1>{tab==='study'?'오늘도 한 문장씩, 꾸준하게.':tab==='quiz'?'이번 주 영어 복습시험':tab==='terms'?'나의 영어 표현 노트':'학습 성장 기록'}</h1><p>{tab==='study'?'영어 원서에서 궁금한 문장을 입력하세요. 배운 표현은 자동으로 저장됩니다.':tab==='quiz'?'학습한 표현과 이전 오답을 바탕으로 10문제를 풀어보세요.':tab==='terms'?'AI 선생님과 공부하며 수집된 표현입니다.':'시험 응시 결과와 학습한 표현을 확인하세요.'}</p></div><div className="stats"><div><span>누적 학습 표현</span><strong>{stats.terms}<small>개</small></strong></div><div><span>완료한 시험</span><strong>{stats.quizzes}<small>회</small></strong></div><div><span>평균 점수</span><strong>{stats.score}<small>점</small></strong></div></div>{error&&<div className="error"><AlertCircle size={16}/>{error}<button onClick={()=>setError('')}>닫기</button></div>}
  {tab==='study'&&<div className="studySections">
+ <section className="panel bookPanel">
+  <label htmlFor="reading-book"><strong>읽고 있는 원서</strong></label>
+  <div className="bookControls">
+   <select id="reading-book" value={bookId} disabled={busy || bookBusy} onChange={event => setBookId(event.target.value)}>
+    <option value="">원서 선택 안 함</option>
+    {books.map(book => <option key={book.id} value={book.id}>{book.title}</option>)}
+   </select>
+   <button type="button" className="secondary" disabled={busy || bookBusy}
+    onClick={() => setAddingBook(open => !open)} aria-expanded={addingBook}>
+    {addingBook ? '닫기' : '+ 새 원서'}
+   </button>
+  </div>
+  {addingBook && <form className="bookControls" onSubmit={createBook}>
+   <input aria-label="새 원서 제목" placeholder="원서 제목을 입력하세요" value={bookTitle}
+    onChange={event => setBookTitle(event.target.value)} required maxLength={180} disabled={bookBusy} autoFocus/>
+   <button className="primary" disabled={bookBusy || !bookTitle.trim()}>등록</button>
+  </form>}
+ </section>
  <section className="panel sourcePanel">
   <div className="readingPractice">
    <label htmlFor="reading-source"><strong>원서 문장 넣기</strong></label>
@@ -213,7 +276,32 @@ export default function Page(){
  </section>
  <section className="panel studyPanel"><div className="panelHead"><div><MessageSquareText size={19}/><strong>AI 원서 선생님</strong></div></div><div className="chat">{data.messages.length===0&&<div className="welcome"><div className="welcomeIcon"><BookOpen size={26}/></div><h2>무엇을 읽고 있나요?</h2><p>읽다가 모르는 단어나 문장을 그대로 입력해 보세요.<br/>예: “I didn't understand her feelings until she explained them.” 에서 until의 의미는?</p><div className="suggestions">{['It wasn’t that I disliked my job. 해석해줘','take time off와 get away from 차이','Ivy and Bean 문장 구조를 설명해줘'].map(s=><button key={s} onClick={()=>setMessage(s)}>{s}</button>)}</div></div>}{data.messages.map((m,i)=><div className={'bubbleRow '+(m.role==='user'?'mine':'')} key={m.id||i} ref={i === latestReplyIndex ? latestReply : null}><div className={'bubble '+m.role}>{m.role === 'assistant' ? <TutorReply content={m.content}/> : m.content}</div></div>)}{busy&&<div className="thinking">답변을 준비하고 학습 표현을 정리하는 중...</div>}</div><form className="compose" onSubmit={ask}><input value={message} disabled={busy} onChange={e=>setMessage(e.target.value)} placeholder="공부하고 싶은 단어·문장·질문을 입력하세요..." maxLength={2000}/><button className="primary send" type="submit" disabled={busy||!message.trim()}><Send size={18}/></button></form><p className="note">학습 대화와 주요 영어 표현은 로그인 계정에 저장됩니다. 개인 비밀번호 등 민감정보는 입력하지 마세요.</p></section></div>}
  {tab==='quiz'&&<section className="panel"><div className="panelHead"><div><ClipboardCheck size={19}/><strong>Weekly Review</strong></div><button className="secondary" onClick={generate} disabled={busy}><RefreshCw size={15}/>{busy?'생성 중...':'이번 주 시험 만들기'}</button></div>{!data.quizzes.length?<div className="empty"><BookOpen size={34}/><h3>아직 시험이 없습니다.</h3><p>영어 공부를 시작한 후 ‘이번 주 시험 만들기’를 눌러 보세요.<br/>매주 일요일에도 자동 생성됩니다.</p></div>:<><div className="quizSelect"><label>시험 선택</label><select value={selected?.id||''} onChange={e=>{setQuizId(e.target.value);setAnswers({});setResult(null);}}>{data.quizzes.map(q=><option value={q.id} key={q.id}>{q.week_key} · {q.title}</option>)}</select></div>{already&&!result?<div className="submitted"><CheckCircle2 size={24}/><h3>이미 응시한 시험입니다.</h3><p>점수: <strong>{already.score}점</strong> · 다른 주의 시험을 선택하거나 학습 성적 탭을 확인하세요.</p></div>:result?<div className="results"><div className="scoreCard"><CheckCircle2 size={28}/><span>이번 시험 점수</span><strong>{result.score}<small> / 100</small></strong></div>{result.detail.map((d,i)=><div className={'answerCard '+(d.correct?'correct':'wrong')} key={i}><b>{i+1}. {d.stem}</b><p>{d.correct?'✓ 정답입니다.':'✗ 오답입니다.'} 정답: {selected.questions[i].options[d.correctIndex]}</p><div>{d.explanation}</div></div>)}</div>:<div className="questions">{selected.questions.map((q,i)=><div className="question" key={i}><div className="qNum">QUESTION {String(i+1).padStart(2,'0')}</div><h3>{q.stem}</h3><div className="options">{q.options.map((o,j)=><button key={j} className={answers[i]===j?'picked':''} onClick={()=>setAnswers(a=>({...a,[i]:j}))}><span>{'ABCD'[j]}</span>{o}</button>)}</div></div>)}<button className="primary submit" onClick={submit} disabled={busy}>시험 제출하고 채점받기</button></div>}</>}</section>}
- {tab==='terms'&&<section className="panel"><div className="panelHead"><div><LibraryBig size={19}/><strong>My Vocabulary Library</strong></div><span className="pill">{data.terms.length} expressions</span></div>{!data.terms.length?<div className="empty"><LibraryBig size={32}/><p>영어 원서 공부에서 새로운 표현을 배우면 여기에 자동으로 쌓입니다.</p></div>:<div className="termGrid">{data.terms.map(t=><article className="term" key={t.id}><div className="termTop"><span className="pill">{t.kind}</span>{t.wrong_count>0&&<span className="mistake">오답 {t.wrong_count}회</span>}</div><h3>{t.expression}</h3><strong>{t.meaning}</strong><p>{t.example}</p></article>)}</div>}</section>}
+ {tab==='terms'&&<section className="panel">
+  <div className="panelHead"><div><LibraryBig size={19}/><strong>단어·표현 노트</strong></div><span className="pill">{filteredTerms.length}개</span></div>
+  <div className="bookPanel">
+   <label htmlFor="book-filter">원서별 보기</label>
+   <select id="book-filter" value={bookFilter} onChange={event => setBookFilter(event.target.value)}>
+    <option value="all">전체</option>
+    <option value="unfiled">미분류</option>
+    {books.map(book => <option key={book.id} value={book.id}>{book.title}</option>)}
+   </select>
+  </div>
+  {!filteredTerms.length ? <div className="empty"><LibraryBig size={32}/><p>이 분류에 저장된 표현이 없습니다.</p></div> :
+   <div className="termGrid">{filteredTerms.map(term => {
+    const linkedTitles = term.bookIds.map(id => bookTitles.get(id)).filter(Boolean);
+    const availableBooks = books.filter(book => !term.bookIds.includes(book.id));
+    return <article className="term" key={term.id}>
+     <div className="termTop"><span className="pill">{term.kind}</span>{term.wrong_count > 0 && <span className="mistake">오답 {term.wrong_count}회</span>}</div>
+     <h3>{term.expression}</h3><strong>{term.meaning}</strong><p>{term.example}</p>
+     <p className="termBooks">{linkedTitles.length ? linkedTitles.join(' · ') : '미분류'}</p>
+     {!!availableBooks.length && <select aria-label={term.expression + '을 연결할 원서'} value="" disabled={bookBusy}
+      onChange={event => linkTerm(term.id, event.target.value)}>
+      <option value="">원서에 연결</option>
+      {availableBooks.map(book => <option key={book.id} value={book.id}>{book.title}</option>)}
+     </select>}
+    </article>;
+   })}</div>}
+ </section>}
  {tab==='progress'&&<section className="panel"><div className="panelHead"><div><ChartNoAxesColumnIncreasing size={19}/><strong>학습 이력</strong></div></div>{!data.attempts.length?<div className="empty"><ChartNoAxesColumnIncreasing size={32}/><p>첫 주간 복습시험을 마치면 점수가 여기에 기록됩니다.</p></div>:<div className="history">{data.attempts.map((a,i)=><div className="historyRow" key={i}><span>{new Date(a.created_at).toLocaleDateString('ko-KR')}</span><div className="progressBar"><div style={{width:`${a.score}%`}}/></div><strong>{a.score}점</strong><small>오답 {a.wrong_expressions?.length||0}개</small></div>)}</div>}</section>}
  <footer className="appFoot">My English Reading Studio · Private learning space</footer></div></main></div>;
 }
