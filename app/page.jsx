@@ -41,6 +41,9 @@ export default function Page(){
  const [sourceText, setSourceText] = useState('');
  const [ownTranslation, setOwnTranslation] = useState('');
  const ownSource = sourceText.trim();
+ const [hintResult, setHintResult] = useState(null);
+ const [hintsLoading, setHintsLoading] = useState(false);
+ const visibleHints = hintResult?.source === ownSource ? hintResult : null;
  const [practiceOpen, setPracticeOpen] = useState(true);
  const [translations, setTranslations] = useState(() => practiceSentences.map(() => ''));
  const latestReply = useRef(null);
@@ -72,7 +75,7 @@ export default function Page(){
    setError(failure.message);
   }
  }
- useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setPracticeOpen(true);setSourceText('');setOwnTranslation('');setTranslations(practiceSentences.map(() => ''));}},[token]);
+ useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);setTranslations(practiceSentences.map(() => ''));}},[token]);
  useEffect(() => {
   if (replyVersion) latestReply.current?.scrollIntoView({ block: 'start' });
  }, [replyVersion]);
@@ -112,6 +115,20 @@ export default function Page(){
   if (await sendStudy(message.trim())) setMessage('');
  }
 
+ async function showReadingHints() {
+  if (!ownSource || hintsLoading || visibleHints?.hints) return;
+  setHintsLoading(true);
+  setHintResult(null);
+  try {
+   const { hints } = await api('/api/study/hints', 'POST', { source: ownSource });
+   setHintResult({ source: ownSource, hints });
+  } catch (failure) {
+   setHintResult({ source: ownSource, error: failure.message });
+  } finally {
+   setHintsLoading(false);
+  }
+ }
+
  async function evaluatePractice(event) {
   event.preventDefault();
   if (ownSource) {
@@ -142,6 +159,7 @@ export default function Page(){
     placeholder="읽고 있는 영어 원서 문장을 붙여넣으세요"
     onChange={event => {
      setSourceText(event.target.value);
+     setHintResult(null);
      if (event.target.value.trim()) setPracticeOpen(true);
     }}/>
   </div>
@@ -160,6 +178,18 @@ export default function Page(){
    <textarea id="own-translation" placeholder="위에 넣은 문장을 한국어로 해석해 보세요" rows={3}
     maxLength={900} required disabled={busy} value={ownTranslation}
     onChange={event => setOwnTranslation(event.target.value)}/>
+   <div className="readingHints" aria-live="polite">
+    {visibleHints?.hints ? (visibleHints.hints.length ? <ul>
+     {visibleHints.hints.map(({ expression, meaning }) => <li key={expression}>
+      <strong lang="en">{expression}</strong> — {meaning}
+     </li>)}
+    </ul> : <p>이 문장에는 따로 짚을 표현이 없어요.</p>) : <>
+     <button type="button" className="secondary" onClick={showReadingHints} disabled={busy || hintsLoading}>
+      {hintsLoading ? '힌트 찾는 중…' : '단어·표현 힌트 보기'}
+     </button>
+     {visibleHints?.error && <p role="alert">{visibleHints.error}</p>}
+    </>}
+   </div>
   </div> : <>
   <h2>동명사 주어 연습</h2>
   <p>문장 맨 앞의 <strong>-ing</strong>가 ‘무엇을 하는 것’이라는 주어가 되는지 살펴보세요.</p>
