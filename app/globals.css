@@ -90,3 +90,50 @@
 .tutorTable td {
   border-top: 1px solid #e3ece8;
 }
+
+.readingPractice {
+  max-width: 50rem;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.readingPractice h2 {
+  margin: 0 0 .5rem;
+  font-size: 1.35rem;
+}
+
+.readingPractice > p {
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+}
+
+.practiceSentence {
+  margin-bottom: .75rem;
+  padding: 1rem;
+  border: 1px solid #dbe8e2;
+  border-radius: .75rem;
+  background: #f8fcfa;
+}
+
+.practiceSentence label,
+.practiceSentence small {
+  color: #385c51;
+}
+
+.practiceEnglish {
+  margin: .35rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.practiceSentence textarea {
+  display: block;
+  width: 100%;
+  margin-top: .55rem;
+  padding: .65rem .75rem;
+  border: 1px solid #a9c5ba;
+  border-radius: .5rem;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  resize: vertical;
+}
