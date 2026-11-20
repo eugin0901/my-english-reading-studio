@@ -319,3 +319,20 @@
 .assessmentFeedback table {
   min-width: 28rem;
 }
+
+.tutorPracticePreview {
+  margin-top: 1rem;
+  padding: .85rem 1rem;
+  border: 1px solid #c6dfd7;
+  border-radius: .7rem;
+  background: #fff;
+}
+
+.bubble.assistant .tutorPracticePreview h3 {
+  margin-top: 0;
+}
+
+.tutorPracticePreview .dailyReviewLink {
+  margin-top: .9rem;
+  text-decoration: none;
+}
