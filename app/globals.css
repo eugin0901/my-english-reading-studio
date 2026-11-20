@@ -1232,3 +1232,81 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media (max-width:380px) {
  .studyHeroActions {grid-template-columns:1fr;}
 }
+
+
+/* Mobile-first dashboard inspired by the supplied ReadingStudio reference */
+:root { --studio-blue:#2f5bf4; --studio-ink:#1d2d58; --studio-muted:#7885a3; --studio-bg:#f5f6fd; }
+body{background:var(--studio-bg); color:var(--studio-ink);}
+.mobileAppHeader,.mobileBottomNav{display:none;}
+.homeDashboard{max-width:880px;margin:0 auto 28px;}
+.homeIntro{padding:15px 2px 22px;}
+.homeEyebrow{font-size:13px;font-weight:800;letter-spacing:.08em;color:#476cae;margin:0 0 14px;}
+.homeIntro h1{font-size:clamp(29px,3.5vw,42px);line-height:1.22;letter-spacing:-.045em;margin:0 0 10px;color:#192c58;font-weight:800;}
+.homeIntro>p:last-child{font-size:clamp(14px,1.4vw,18px);color:#79859f;margin:0;line-height:1.6;}
+.weeklyChallenge{background:#2d58ef;border-radius:27px;color:#fff;padding:33px 37px 34px;box-shadow:0 16px 32px #3158e61b;}
+.challengeKicker{color:#dbe5ff;font-size:13px;letter-spacing:.04em;font-weight:800;margin-bottom:15px;}
+.challengeTitle{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.challengeTitle h2{font-size:clamp(26px,3vw,36px);line-height:1.2;color:#fff;margin:0;letter-spacing:-.04em;}
+.challengeTitle svg{color:#ffe479;flex-shrink:0;}
+.weeklyChallenge p{font-size:clamp(15px,1.6vw,19px);margin:17px 0 25px;color:#f3f6ff;}
+.challengeAction{display:flex;align-items:center;justify-content:center;gap:12px;min-height:65px;width:100%;border:0;border-radius:19px;background:#fff;color:#3157e7;font-size:20px;font-weight:800;transition:transform .15s, background .15s;}
+.challengeAction:hover{background:#f3f5ff;transform:translateY(-1px);}
+.homeQuickCards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px;margin-top:20px;}
+.homeQuickCard{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:10px;min-height:170px;padding:27px 28px;border:0;border-radius:25px;background:#fff;box-shadow:0 8px 22px #213e9008;color:#233766;transition:transform .15s,box-shadow .15s;}
+.homeQuickCard:hover{transform:translateY(-2px);box-shadow:0 14px 32px #213e9015;}
+.homeQuickCard svg{color:#315fe8;margin-bottom:4px;}
+.homeQuickCard strong{font-size:clamp(18px,1.8vw,23px);letter-spacing:-.035em;}
+.homeQuickCard span{font-size:14px;color:#7b86a0;}
+.homeSnapshot{margin-top:26px;padding:24px;background:#fff;border-radius:23px;border:1px solid #e9ecfa;}
+.snapshotTitle{font-size:16px;color:#1d3264;font-weight:800;margin-bottom:16px;}
+.snapshotGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;}
+.snapshotGrid>div{background:#f6f8ff;border-radius:15px;padding:18px 12px;}
+.snapshotGrid span{display:block;color:#7987a3;font-size:12px;margin-bottom:7px;}
+.snapshotGrid strong{color:#213a85;font-size:26px;}
+.snapshotGrid small{color:#8290a9;font-size:11px;font-weight:500;margin-left:3px;}
+.homeStudyLink{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:20px;padding:15px;border:1px solid #d8e1ff;border-radius:15px;background:#ecf1ff;color:#3558cd;font-size:15px;font-weight:800;width:100%;}
+.homeStudyLink:hover{background:#e1e9ff;}
+.termMode{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.termMode button{border:1px solid #d9e2fa;background:#fff;color:#65769a;border-radius:12px;padding:10px 14px;font-weight:700;}
+.termMode button.active{border-color:#2f5bf4;background:#edf2ff;color:#2c55d9;}
+@media(max-width:760px){
+ .app{display:block;width:100%;min-width:0;}
+ .sidebar{display:none !important;}
+ .content{width:100%;min-width:0;padding-bottom:calc(78px + env(safe-area-inset-bottom));}
+ .mobileAppHeader{display:flex;align-items:center;justify-content:space-between;background:#f5f6fd;padding:18px 20px 10px;min-height:80px;}
+ .mobileBrand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:800;color:#1e305d;letter-spacing:-.04em;min-width:0;}
+ .mobileBrand .logo{width:43px;height:43px;background:#2f5bf4;color:white;border-radius:14px;display:grid;place-items:center;box-shadow:none;flex-shrink:0;}
+ .mobileProfile{border:0;background:transparent;color:#667493;display:grid;place-items:center;padding:8px;border-radius:50%;}
+ .mobileProfile:hover{background:#e8edfc;}
+ .pageBody{padding:5px 20px 32px;max-width:100%;}
+ .homeIntro{padding:12px 0 24px;}
+ .homeEyebrow{font-size:12px;margin-bottom:14px;}
+ .homeIntro h1{font-size:clamp(25px,6.6vw,35px);white-space:normal;}
+ .homeIntro>p:last-child{font-size:14px;}
+ .weeklyChallenge{border-radius:25px;padding:25px 23px 26px;box-shadow:none;}
+ .challengeKicker{font-size:12px;}
+ .challengeTitle h2{font-size:clamp(24px,6vw,32px);}
+ .challengeTitle svg{width:30px;height:30px;}
+ .weeklyChallenge p{font-size:15px;line-height:1.6;margin:13px 0 22px;}
+ .challengeAction{min-height:60px;font-size:18px;border-radius:18px;}
+ .homeQuickCards{gap:11px;margin-top:14px;}
+ .homeQuickCard{padding:21px 17px;min-height:155px;border-radius:23px;gap:9px;}
+ .homeQuickCard strong{font-size:clamp(16px,4vw,21px);line-height:1.4;}
+ .homeQuickCard span{font-size:clamp(11px,3vw,14px);line-height:1.4;}
+ .homeQuickCard svg{width:27px;height:27px;}
+ .homeSnapshot{padding:18px 14px;border-radius:20px;margin-top:18px;}
+ .snapshotGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+ .snapshotGrid>div{padding:13px;border-radius:12px;}
+ .mobileBottomNav{position:fixed;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));left:0;right:0;bottom:0;z-index:60;min-height:70px;padding:9px 7px calc(7px + env(safe-area-inset-bottom));background:#fff;box-shadow:0 -6px 22px #172e6c0d;border-top:1px solid #edf0fc;}
+ .mobileBottomNav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:transparent;border:0;color:#64759b;min-width:0;font-size:11px;font-weight:700;padding:4px;border-radius:12px;}
+ .mobileBottomNav button.active{color:#2e5af2;background:#f1f5ff;}
+ .mobileBottomNav button span{white-space:nowrap;}
+}
+@media(max-width:375px){
+ .pageBody{padding-inline:14px;}
+ .mobileAppHeader{padding-inline:14px;}
+ .mobileBrand{font-size:18px;}
+ .weeklyChallenge{padding:22px 18px;}
+ .homeQuickCard{padding:18px 14px;}
+ .homeQuickCard strong{font-size:16px;}
+}
