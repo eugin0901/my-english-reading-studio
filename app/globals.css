@@ -1076,3 +1076,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .stats>div { padding:16px 14px;border-radius:15px; }
  .signInIntro:after { opacity:.16; }
 }
+
+.sidebar .brand .logo {
+  background: #dff68b;
+  color: #283399;
+  box-shadow: none;
+}
