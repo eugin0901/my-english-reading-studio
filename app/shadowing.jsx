@@ -7,12 +7,14 @@ import { encodeMonoWav, RECORDING_SECONDS, RECORDING_SAMPLE_RATE } from '../lib/
 export default function Shadowing({ sentence, token }) {
   const [status, setStatus] = useState('idle');
   const [recording, setRecording] = useState(null);
+  const [spokenUrl, setSpokenUrl] = useState('');
   const [feedback, setFeedback] = useState('');
   const [error, setError] = useState('');
   const active = useRef(null);
   const alive = useRef(false);
   const audio = useRef(null);
-  const utterance = useRef(null);
+  const spokenAudio = useRef(null);
+  const speechUrl = useRef(null);
   const pending = useRef(null);
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export default function Shadowing({ sentence, token }) {
         if (take.recorder.state !== 'inactive') take.recorder.stop();
         take.stream.getTracks().forEach(track => track.stop());
       }
-      if (utterance.current) window.speechSynthesis?.cancel();
+      if (speechUrl.current) URL.revokeObjectURL(speechUrl.current);
     };
   }, []);
 
@@ -37,27 +39,50 @@ export default function Shadowing({ sentence, token }) {
     };
   }, [recording]);
 
-  function listen(rate) {
-    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
-      setError('이 브라우저에서는 문장 읽기를 지원하지 않습니다.');
-      return;
-    }
+  async function listen(rate) {
+    if (status !== 'idle' || !token || pending.current) return;
     setError('');
     audio.current?.pause();
-    const speech = new SpeechSynthesisUtterance(sentence);
-    const voice = window.speechSynthesis.getVoices().find(item => item.lang.toLowerCase() === 'en-us');
-    if (voice) speech.voice = voice;
-    speech.lang = 'en-US';
-    speech.rate = rate;
-    speech.onend = () => { if (utterance.current === speech) utterance.current = null; };
-    speech.onerror = event => {
-      if (utterance.current !== speech) return;
-      utterance.current = null;
-      if (!['canceled', 'interrupted'].includes(event.error)) setError('영어 음성을 재생할 수 없습니다. 브라우저의 음성 설정을 확인해 주세요.');
-    };
-    window.speechSynthesis.cancel();
-    utterance.current = speech;
-    window.speechSynthesis.speak(speech);
+    const player = spokenAudio.current;
+    player.pause();
+
+    if (!speechUrl.current) {
+      setStatus('loading-speech');
+      const controller = new AbortController();
+      pending.current = controller;
+      try {
+        const response = await fetch('/api/study/speech', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sentence }),
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          const result = await response.json().catch(() => null);
+          throw new Error(result?.error || 'AI 음성을 준비하지 못했습니다.');
+        }
+        const blob = await response.blob();
+        if (!alive.current) return;
+        speechUrl.current = URL.createObjectURL(blob);
+        player.src = speechUrl.current;
+        setSpokenUrl(speechUrl.current);
+      } catch (failure) {
+        if (alive.current && !controller.signal.aborted) setError(failure.message);
+        return;
+      } finally {
+        if (pending.current === controller) pending.current = null;
+        if (alive.current) setStatus('idle');
+      }
+    }
+    player.currentTime = 0;
+    player.playbackRate = rate;
+    try {
+      await player.play();
+    } catch (failure) {
+      if (alive.current && failure.name !== 'AbortError') {
+        setError(failure.name === 'NotAllowedError' ? '아래 음성 플레이어의 재생 버튼을 눌러 주세요.' : 'AI 음성을 재생하지 못했습니다.');
+      }
+    }
   }
 
   async function startRecording() {
@@ -69,7 +94,7 @@ export default function Shadowing({ sentence, token }) {
     setStatus('requesting');
     setError('');
     audio.current?.pause();
-    window.speechSynthesis?.cancel();
+    spokenAudio.current?.pause();
     let stream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -131,7 +156,7 @@ export default function Shadowing({ sentence, token }) {
     setStatus('evaluating');
     setError('');
     audio.current?.pause();
-    window.speechSynthesis?.cancel();
+    spokenAudio.current?.pause();
     const controller = new AbortController();
     pending.current = controller;
     const form = new FormData();
@@ -169,11 +194,14 @@ export default function Shadowing({ sentence, token }) {
           <Mic size={15} aria-hidden="true"/>{recording ? '다시 말하기' : '따라 말하기'}
         </button>}
     </div>
+    <p>미국식 영어 AI 음성</p>
+    <audio ref={spokenAudio} controls hidden={!spokenUrl} aria-label="미국식 영어 AI 음성" onPlay={() => audio.current?.pause()}/>
+    {status === 'loading-speech' && <p role="status">AI 음성을 준비하고 있습니다.</p>}
     {status === 'requesting' && <p role="status">마이크 권한을 기다리고 있습니다.</p>}
     {status === 'recording' && <p role="status">녹음 중 · 최대 {RECORDING_SECONDS}초</p>}
     {status === 'preparing' && <p role="status">녹음을 준비하고 있습니다.</p>}
     {recording && <div className="shadowingRecording">
-      <audio ref={audio} controls src={recording.url} aria-label="내 녹음 듣기" onPlay={() => window.speechSynthesis?.cancel()}/>
+      <audio ref={audio} controls src={recording.url} aria-label="내 녹음 듣기" onPlay={() => spokenAudio.current?.pause()}/>
       <button type="button" className="primary" disabled={status !== 'idle'} onClick={requestFeedback}>
         {status === 'evaluating' ? '발음 확인 중…' : '발음 피드백 받기'}
       </button>
