@@ -1091,3 +1091,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .studyHeroActions a[href="#reading-skills"]:hover {
   background: #eaf9ad;
 }
+
+.dailyReviewLink {
+  background: #dff68b;
+  border-color: #c9df78;
+  color: #202b58;
+}
+
+.dailyReviewLink:hover {
+  background: #eaf9ad;
+}
