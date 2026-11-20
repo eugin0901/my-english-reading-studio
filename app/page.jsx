@@ -23,12 +23,6 @@ class TutorReply extends Component {
  }
 }
 
-const practiceSentences = [
-  { english: 'Reading books helps me understand the world.', hint: 'the world = 세상' },
-  { english: 'Thinking about the past helps us understand ourselves.', hint: 'the past = 과거 / ourselves = 우리 자신' },
-  { english: 'Sometimes, making mistakes teaches us important lessons.', hint: 'make mistakes = 실수하다 / teach = 가르치다' },
-];
-
 let supabase;
 function client(){
  if(!supabase) supabase=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
@@ -50,7 +44,6 @@ export default function Page(){
  const [hintsLoading, setHintsLoading] = useState(false);
  const visibleHints = hintResult?.source === ownSource ? hintResult : null;
  const [practiceOpen, setPracticeOpen] = useState(true);
- const [translations, setTranslations] = useState(() => practiceSentences.map(() => ''));
  const latestReply = useRef(null);
  const studySequence = useRef(0);
  const [replyVersion, setReplyVersion] = useState(0);
@@ -80,7 +73,7 @@ export default function Page(){
    setError(failure.message);
   }
  }
- useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setBookId('');setBookFilter('all');setBookTitle('');setAddingBook(false);setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);setTranslations(practiceSentences.map(() => ''));}},[token]);
+ useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setBookId('');setBookFilter('all');setBookTitle('');setAddingBook(false);setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);}},[token]);
  useEffect(() => {
   if (replyVersion) latestReply.current?.scrollIntoView({ block: 'start' });
  }, [replyVersion]);
@@ -170,16 +163,9 @@ export default function Page(){
 
  async function evaluatePractice(event) {
   event.preventDefault();
-  if (ownSource) {
-   const translation = ownTranslation.trim();
-   if (translation) await sendStudy(['독해를 평가해줘.', '원문: ' + ownSource, '내 해석: ' + translation].join('\n'));
-   return;
-  }
-  if (translations.some(translation => !translation.trim())) return;
-  const rows = practiceSentences.map(({ english }, index) =>
-   ['문장 ' + (index + 1), '원문: ' + english, '내 해석: ' + translations[index].trim()].join('\n'));
-  const input = ['동명사가 주어인 문장 연습이야. 세 문장의 독해를 각각 평가해줘.', ...rows].join('\n\n');
-  await sendStudy(input);
+  const translation = ownTranslation.trim();
+  if (!ownSource || !translation) return;
+  await sendStudy(['독해를 평가해줘.', '원문: ' + ownSource, '내 해석: ' + translation].join('\n'));
  }
 
  async function generate(){setBusy(true);setError('');try{await api('/api/quiz/generate','POST',{});await reload();setTab('quiz');}catch(e){setError(e.message);}finally{setBusy(false);}}
@@ -227,7 +213,7 @@ export default function Page(){
     }}/>
   </div>
  </section>
- <section className="panel">
+ {ownSource && <section className="panel">
   <div className="panelHead">
    <div><BookOpen size={19}/><strong>먼저 해석하기 : 스스로 해석해봐!</strong></div>
    <button type="button" className="secondary" disabled={busy} aria-expanded={practiceOpen} aria-controls="reading-practice"
@@ -236,7 +222,7 @@ export default function Page(){
    </button>
   </div>
  <form id="reading-practice" className="readingPractice" hidden={!practiceOpen} onSubmit={evaluatePractice}>
-  {ownSource ? <div className="practiceSentence">
+  <div className="practiceSentence">
    <label htmlFor="own-translation">내 해석</label>
    <textarea id="own-translation" placeholder="위에 넣은 문장을 한국어로 해석해 보세요" rows={3}
     maxLength={900} required disabled={busy} value={ownTranslation}
@@ -253,27 +239,12 @@ export default function Page(){
      {visibleHints?.error && <p role="alert">{visibleHints.error}</p>}
     </>}
    </div>
-  </div> : <>
-  <h2>동명사 주어 연습</h2>
-  <p>문장 맨 앞의 <strong>-ing</strong>가 ‘무엇을 하는 것’이라는 주어가 되는지 살펴보세요.</p>
-  {practiceSentences.map(({english, hint}, index) => <div className="practiceSentence" key={english}>
-   <label htmlFor={'practice-' + index}>문장 {index + 1} 내 해석</label>
-   <p className="practiceEnglish" lang="en">{english}</p>
-   <small id={'practice-hint-' + index}>{hint}</small>
-   <textarea id={'practice-' + index} aria-describedby={'practice-hint-' + index}
-    placeholder="한국어로 먼저 해석해 보세요" rows={2} maxLength={450} required
-    disabled={busy} value={translations[index]}
-    onChange={event => {
-     const value = event.target.value;
-     setTranslations(current => current.map((text, position) => position === index ? value : text));
-    }}/>
-  </div>)}
-  </>}
-  <button className="primary" disabled={busy || (ownSource ? !ownTranslation.trim() : translations.some(text => !text.trim()))}>
+  </div>
+  <button className="primary" disabled={busy || !ownTranslation.trim()}>
    {busy ? '독해 평가 중…' : '내 해석 평가받기'}
   </button>
  </form>
- </section>
+ </section>}
  <section className="panel studyPanel"><div className="panelHead"><div><MessageSquareText size={19}/><strong>AI 원서 선생님</strong></div></div><div className="chat">{data.messages.length===0&&<div className="welcome"><div className="welcomeIcon"><BookOpen size={26}/></div><h2>무엇을 읽고 있나요?</h2><p>읽다가 모르는 단어나 문장을 그대로 입력해 보세요.<br/>예: “I didn't understand her feelings until she explained them.” 에서 until의 의미는?</p><div className="suggestions">{['It wasn’t that I disliked my job. 해석해줘','take time off와 get away from 차이','Ivy and Bean 문장 구조를 설명해줘'].map(s=><button key={s} onClick={()=>setMessage(s)}>{s}</button>)}</div></div>}{data.messages.map((m,i)=><div className={'bubbleRow '+(m.role==='user'?'mine':'')} key={m.id||i} ref={i === latestReplyIndex ? latestReply : null}><div className={'bubble '+m.role}>{m.role === 'assistant' ? <TutorReply content={m.content}/> : m.content}</div></div>)}{busy&&<div className="thinking">답변을 준비하고 학습 표현을 정리하는 중...</div>}</div><form className="compose" onSubmit={ask}><input value={message} disabled={busy} onChange={e=>setMessage(e.target.value)} placeholder="공부하고 싶은 단어·문장·질문을 입력하세요..." maxLength={2000}/><button className="primary send" type="submit" disabled={busy||!message.trim()}><Send size={18}/></button></form><p className="note">학습 대화와 주요 영어 표현은 로그인 계정에 저장됩니다. 개인 비밀번호 등 민감정보는 입력하지 마세요.</p></section></div>}
  {tab==='quiz'&&<section className="panel"><div className="panelHead"><div><ClipboardCheck size={19}/><strong>Weekly Review</strong></div><button className="secondary" onClick={generate} disabled={busy}><RefreshCw size={15}/>{busy?'생성 중...':'이번 주 시험 만들기'}</button></div>{!data.quizzes.length?<div className="empty"><BookOpen size={34}/><h3>아직 시험이 없습니다.</h3><p>영어 공부를 시작한 후 ‘이번 주 시험 만들기’를 눌러 보세요.<br/>매주 일요일에도 자동 생성됩니다.</p></div>:<><div className="quizSelect"><label>시험 선택</label><select value={selected?.id||''} onChange={e=>{setQuizId(e.target.value);setAnswers({});setResult(null);}}>{data.quizzes.map(q=><option value={q.id} key={q.id}>{q.week_key} · {q.title}</option>)}</select></div>{already&&!result?<div className="submitted"><CheckCircle2 size={24}/><h3>이미 응시한 시험입니다.</h3><p>점수: <strong>{already.score}점</strong> · 다른 주의 시험을 선택하거나 학습 성적 탭을 확인하세요.</p></div>:result?<div className="results"><div className="scoreCard"><CheckCircle2 size={28}/><span>이번 시험 점수</span><strong>{result.score}<small> / 100</small></strong></div>{result.detail.map((d,i)=><div className={'answerCard '+(d.correct?'correct':'wrong')} key={i}><b>{i+1}. {d.stem}</b><p>{d.correct?'✓ 정답입니다.':'✗ 오답입니다.'} 정답: {selected.questions[i].options[d.correctIndex]}</p><div>{d.explanation}</div></div>)}</div>:<div className="questions">{selected.questions.map((q,i)=><div className="question" key={i}><div className="qNum">QUESTION {String(i+1).padStart(2,'0')}</div><h3>{q.stem}</h3><div className="options">{q.options.map((o,j)=><button key={j} className={answers[i]===j?'picked':''} onClick={()=>setAnswers(a=>({...a,[i]:j}))}><span>{'ABCD'[j]}</span>{o}</button>)}</div></div>)}<button className="primary submit" onClick={submit} disabled={busy}>시험 제출하고 채점받기</button></div>}</>}</section>}
  {tab==='terms'&&<section className="panel">
