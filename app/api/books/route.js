@@ -23,15 +23,21 @@ export async function POST(request) {
 export async function PATCH(request) {
   try {
     const { user, db } = await requireUser(request);
-    const { bookId, termId } = (await request.json().catch(() => null)) || {};
+    const { bookId, termId, weekStart } = (await request.json().catch(() => null)) || {};
     if (!isUuid(bookId) || !isUuid(termId)) {
       return Response.json({ error: '원서와 학습 표현을 선택해 주세요.' }, { status: 400 });
     }
-    const { error } = await db.from('reading_book_terms').insert({ user_id: user.id, book_id: bookId, term_id: termId });
+    if (weekStart != null && (typeof weekStart !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(weekStart) ||
+        new Date(weekStart + 'T00:00:00Z').getUTCDay() !== 0)) {
+      return Response.json({ error: '올바른 주차를 선택해 주세요.' }, { status: 400 });
+    }
+    const { error } = await db.rpc('assign_reading_term_book', {
+      p_user_id: user.id, p_book_id: bookId, p_term_id: termId, p_week_start: weekStart || null,
+    });
     if (error?.code === '23503') {
       return Response.json({ error: '원서 또는 표현을 찾을 수 없습니다.' }, { status: 404 });
     }
-    if (error && error.code !== '23505') throw error;
+    if (error) throw error;
     return Response.json({ ok: true });
   } catch (error) {
     return jsonError(error, 'books.link');

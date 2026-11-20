@@ -30,11 +30,19 @@ function client(){
  return supabase;
 }
 const empty={messages:[],terms:[],quizzes:[],attempts:[],books:[]};
+
+function noteWeekLabel(start) {
+ const end = new Date(start + 'T00:00:00Z');
+ end.setUTCDate(end.getUTCDate() + 6);
+ const last = end.toISOString().slice(0, 10);
+ return start + ' ~ ' + (start.slice(0, 4) === last.slice(0, 4) ? last.slice(5) : last);
+}
 export default function Page(){
  const [session,setSession]=useState(null),[email,setEmail]=useState(''),[linkSent,setLinkSent]=useState(false),[tab,setTab]=useState('study');
  const [data,setData]=useState(empty),[busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState(''),[quizId,setQuizId]=useState(''),[answers,setAnswers]=useState({}),[result,setResult]=useState(null);
  const [bookId, setBookId] = useState('');
  const [bookFilter, setBookFilter] = useState('all');
+ const [weekFilter, setWeekFilter] = useState('all');
  const [bookTitle, setBookTitle] = useState('');
  const [addingBook, setAddingBook] = useState(false);
  const [bookBusy, setBookBusy] = useState(false);
@@ -100,7 +108,7 @@ export default function Page(){
    setError(failure.message);
   }
  }
- useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setBookId('');setBookFilter('all');setBookTitle('');setAddingBook(false);setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);setReadingAssessment(null);setExerciseTranslation('');setExerciseComposition('');}},[token]);
+ useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setBookId('');setBookFilter('all');setWeekFilter('all');setBookTitle('');setAddingBook(false);setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);setReadingAssessment(null);setExerciseTranslation('');setExerciseComposition('');}},[token]);
  useEffect(() => {
   if (replyVersion) latestReply.current?.scrollIntoView({ block: 'start' });
  }, [replyVersion]);
@@ -140,10 +148,10 @@ export default function Page(){
   setBookBusy(true);
   setError('');
   try {
-   await api('/api/books', 'PATCH', { termId, bookId: selectedBookId });
-   setData(current => ({ ...current, terms: current.terms.map(term =>
-    term.id === termId ? { ...term, bookIds: [...new Set([...term.bookIds, selectedBookId])] } : term
-   ) }));
+   await api('/api/books', 'PATCH', {
+    termId, bookId: selectedBookId, weekStart: weekFilter === 'all' ? null : weekFilter,
+   });
+   await reload();
   } catch (failure) {
    setError(failure.message);
   } finally {
@@ -238,10 +246,12 @@ export default function Page(){
   item.role === 'assistant' ? item.content : null).lastIndexOf(readingAssessment.tutorAnswer) : -1;
  const books = data.books;
  const bookTitles = new Map(books.map(book => [book.id, book.title]));
- const filteredTerms = data.terms.filter(term => {
-  if (bookFilter === 'all') return true;
-  return bookFilter === 'unfiled' ? !term.bookIds.length : term.bookIds.includes(bookFilter);
- });
+ const matchesBook = placement => bookFilter === 'all' ||
+  (bookFilter === 'unfiled' ? placement.book_id === null : placement.book_id === bookFilter);
+ const weeks = [...new Set(data.terms.flatMap(term =>
+  term.placements.filter(matchesBook).map(placement => placement.week_start)))].sort().reverse();
+ const filteredTerms = data.terms.filter(term => term.placements.some(placement =>
+  matchesBook(placement) && (weekFilter === 'all' || placement.week_start === weekFilter)));
  const selected=data.quizzes.find(q=>q.id===quizId)||data.quizzes[0];
  const already=selected&&data.attempts.find(a=>a.quiz_id===selected.id);
  const stats={terms:data.terms.length,quizzes:data.attempts.length,score:data.attempts.length?Math.round(data.attempts.reduce((a,b)=>a+b.score,0)/data.attempts.length):0};
@@ -411,20 +421,29 @@ export default function Page(){
   <div className="panelHead"><div><LibraryBig size={19}/><strong>단어·표현 노트</strong></div><span className="pill">{filteredTerms.length}개</span></div>
   <div className="bookPanel">
    <label htmlFor="book-filter">원서별 보기</label>
-   <select id="book-filter" value={bookFilter} onChange={event => setBookFilter(event.target.value)}>
+   <select id="book-filter" value={bookFilter} onChange={event => { setBookFilter(event.target.value); setWeekFilter('all'); }}>
     <option value="all">전체</option>
     <option value="unfiled">미분류</option>
     {books.map(book => <option key={book.id} value={book.id}>{book.title}</option>)}
    </select>
+   <label htmlFor="week-filter">주차별 보기</label>
+   <select id="week-filter" value={weekFilter} onChange={event => setWeekFilter(event.target.value)}>
+    <option value="all">전체 주차</option>
+    {weeks.map(week => <option key={week} value={week}>{noteWeekLabel(week)}</option>)}
+   </select>
   </div>
   {!filteredTerms.length ? <div className="empty"><LibraryBig size={32}/><p>이 분류에 저장된 표현이 없습니다.</p></div> :
    <div className="termGrid">{filteredTerms.map(term => {
-    const linkedTitles = term.bookIds.map(id => bookTitles.get(id)).filter(Boolean);
-    const availableBooks = books.filter(book => !term.bookIds.includes(book.id));
+    const placements = term.placements.filter(placement => weekFilter === 'all' || placement.week_start === weekFilter);
+    const linkedTitles = [...new Set(placements.map(({book_id}) => book_id === null ? '미분류' : bookTitles.get(book_id)).filter(Boolean))];
+    const labelWeeks = [...new Set(placements.filter(matchesBook).map(placement => placement.week_start))].sort().reverse();
+    const availableBooks = books.filter(book => placements.some(placement =>
+     !placements.some(link => link.book_id === book.id && link.week_start === placement.week_start)));
     return <article className="term" key={term.id}>
      <div className="termTop"><span className="pill">{term.kind}</span>{term.wrong_count > 0 && <span className="mistake">오답 {term.wrong_count}회</span>}</div>
      <h3>{term.expression}</h3><strong>{term.meaning}</strong><p>{term.example}</p>
-     <p className="termBooks">{linkedTitles.length ? linkedTitles.join(' · ') : '미분류'}</p>
+     <p className="termBooks">{linkedTitles.join(' · ')}</p>
+     <p className="termBooks">{labelWeeks.map(noteWeekLabel).join(' · ')}</p>
      {!!availableBooks.length && <select aria-label={term.expression + '을 연결할 원서'} value="" disabled={bookBusy}
       onChange={event => linkTerm(term.id, event.target.value)}>
       <option value="">원서에 연결</option>

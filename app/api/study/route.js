@@ -34,8 +34,8 @@ export async function POST(request) {
         example: term.example.slice(0, 300),
       }];
     })).values()];
-    const { error } = await db.rpc(bookId ? 'save_book_study_turn' : 'save_study_turn', {
-      ...(bookId ? { p_book_id: bookId } : {}),
+    const { error } = await db.rpc('save_weekly_study_turn', {
+      p_book_id: bookId || null,
       p_user_id: user.id, p_message: message.trim(), p_answer: result.answer, p_terms: terms,
     });
     if (error) {
