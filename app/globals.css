@@ -92,7 +92,6 @@
 }
 
 .readingPractice {
-  max-width: 50rem;
   padding: clamp(1rem, 3vw, 2rem);
 }
 
@@ -556,10 +555,6 @@ body {
 
 .sourcePanel {
   background: #f0f7f2;
-}
-
-.sourcePanel .readingPractice {
-  max-width: none;
 }
 
 .sourcePanel textarea,
