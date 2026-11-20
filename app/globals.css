@@ -354,3 +354,50 @@
 .bilingualExamples > li > span {
   color: #385c51;
 }
+
+.shadowing {
+  margin-block: .85rem;
+  padding: .85rem;
+  border: 1px solid #bfdcd1;
+  border-radius: .65rem;
+  background: #f3faf7;
+  color: #184c42;
+}
+.shadowing h3 {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  margin: 0 0 .65rem;
+  font-size: 1rem;
+}
+.shadowingControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+.shadowingRecording {
+  display: grid;
+  justify-items: start;
+  gap: .6rem;
+  margin-top: .75rem;
+}
+.shadowingRecording audio {
+  width: min(100%, 22rem);
+}
+.shadowing p {
+  margin: .45rem 0 0;
+  font-size: .875rem;
+}
+.shadowingFeedback {
+  margin-top: .75rem;
+  padding: .7rem;
+  border-radius: .45rem;
+  background: #fff;
+}
+.shadowingFeedback h4 {
+  margin: 0;
+}
+.shadowingFeedback p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

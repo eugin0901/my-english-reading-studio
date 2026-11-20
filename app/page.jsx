@@ -1,6 +1,7 @@
 'use client';
 import {Component,useEffect,useState,useRef} from 'react';
 import Markdown from 'react-markdown';
+import Shadowing from './shadowing';
 import remarkGfm from 'remark-gfm';
 import {createClient} from '@supabase/supabase-js';
 import {BookCopy,BookOpen,MessageSquareText,ClipboardCheck,LibraryBig,ChartNoAxesColumnIncreasing,Send,RefreshCw,LogOut,CheckCircle2,AlertCircle,GraduationCap} from 'lucide-react';
@@ -296,6 +297,7 @@ export default function Page(){
      setHintResult(null);
      if (event.target.value.trim()) setPracticeOpen(true);
     }}/>
+   {ownSource && <Shadowing key={ownSource} sentence={ownSource} token={token}/>}
   </div>
  </section>
  {ownSource && <section className="panel">
@@ -378,6 +380,7 @@ export default function Page(){
    <div className="practiceSentence">
     <h4>한 문장 연습</h4>
     <p className="practiceEnglish" lang="en">{readingExercise.example}</p>
+    <Shadowing key={readingExercise.example} sentence={readingExercise.example} token={token}/>
     <label htmlFor="exercise-translation">예문 해석</label>
     <textarea id="exercise-translation" rows={3} maxLength={700} required disabled={busy}
      value={exerciseTranslation} onChange={event => setExerciseTranslation(event.target.value)}
