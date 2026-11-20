@@ -3,7 +3,7 @@ import {Component,useEffect,useState,useRef} from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {createClient} from '@supabase/supabase-js';
-import {BookOpen,MessageSquareText,ClipboardCheck,LibraryBig,ChartNoAxesColumnIncreasing,Send,RefreshCw,LogOut,CheckCircle2,AlertCircle,GraduationCap} from 'lucide-react';
+import {BookCopy,BookOpen,MessageSquareText,ClipboardCheck,LibraryBig,ChartNoAxesColumnIncreasing,Send,RefreshCw,LogOut,CheckCircle2,AlertCircle,GraduationCap} from 'lucide-react';
 
 const tutorMarkup = ['p', 'h1', 'h2', 'h3', 'h4', 'strong', 'em', 'ul', 'ol', 'li', 'blockquote', 'br', 'code', 'del', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td'];
 
@@ -197,8 +197,8 @@ export default function Page(){
  if(!session)return <main className="login"><div className="brand"><div className="logo"><BookOpen/></div> MY ENGLISH READING STUDIO</div><div className="loginCard"><p className="eyebrow">PERSONAL READING COMPANION</p><h1>읽을수록 쌓이는<br/><span>나만의 영어 실력</span></h1><p>AI 영어 선생님과 원서를 공부하면 표현이 자동 저장되고, 매주 일요일 새 복습시험이 만들어집니다.</p><form onSubmit={signIn}><label>이메일 로그인</label><input type="email" placeholder="you@example.com" required value={email} onChange={e=>setEmail(e.target.value)}/><button className="primary" disabled={busy}>{busy?'전송 중...':'로그인 링크 받기'}</button></form>{linkSent&&<div className="success">이메일에서 로그인 링크를 눌러 주세요.</div>}{error&&<p className="err">{error}</p>}<small>로그인 링크는 Supabase 이메일 인증을 사용합니다. 서비스 배포 후 이메일 인증 설정이 필요합니다.</small></div><div className="footer">Study with intention · Review with confidence</div></main>;
  return <div className="app"><aside className="sidebar"><div className="brand"><div className="logo"><BookOpen size={20}/></div><span>Reading<br/>Studio</span></div><div className="sideLabel">MY WORKSPACE</div><nav>{[['study',MessageSquareText,'영어 원서 공부'],['quiz',ClipboardCheck,'주간 복습시험'],['terms',LibraryBig,'단어·표현 노트'],['progress',ChartNoAxesColumnIncreasing,'학습 성적']].map(([id,Icon,label])=><button key={id} className={tab===id?'active':''} onClick={()=>{setTab(id);setError('');setResult(null);setAnswers({});}}><Icon size={19}/>{label}</button>)}</nav><div className="sidebarBottom"><div className="profile"><div className="avatar">{session.user.email?.[0]?.toUpperCase()||'U'}</div><div><strong>My Study Space</strong><small>{session.user.email}</small></div></div><button onClick={()=>client().auth.signOut()}><LogOut size={16}/> 로그아웃</button></div></aside><main className="content"><header className="topbar"><span><GraduationCap size={19}/> Your English journey</span><span className="today">매주 일요일 10:00 KST · 자동 시험</span></header><div className="pageBody"><div className="heading"><p className="eyebrow">YOUR PERSONAL LEARNING SPACE</p><h1>{tab==='study'?'오늘도 한 문장씩, 꾸준하게.':tab==='quiz'?'이번 주 영어 복습시험':tab==='terms'?'나의 영어 표현 노트':'학습 성장 기록'}</h1><p>{tab==='study'?'영어 원서에서 궁금한 문장을 입력하세요. 배운 표현은 자동으로 저장됩니다.':tab==='quiz'?'학습한 표현과 이전 오답을 바탕으로 10문제를 풀어보세요.':tab==='terms'?'AI 선생님과 공부하며 수집된 표현입니다.':'시험 응시 결과와 학습한 표현을 확인하세요.'}</p></div><div className="stats"><div><span>누적 학습 표현</span><strong>{stats.terms}<small>개</small></strong></div><div><span>완료한 시험</span><strong>{stats.quizzes}<small>회</small></strong></div><div><span>평균 점수</span><strong>{stats.score}<small>점</small></strong></div></div>{error&&<div className="error"><AlertCircle size={16}/>{error}<button onClick={()=>setError('')}>닫기</button></div>}
  {tab==='study'&&<div className="studySections">
- <section className="panel bookPanel">
-  <label htmlFor="reading-book"><strong>읽고 있는 원서</strong></label>
+ <section className="panel bookPanel readingBookPanel">
+  <label className="readingBookLabel" htmlFor="reading-book"><BookCopy size={19} aria-hidden="true"/><strong>원서 제목</strong></label>
   <div className="bookControls">
    <select id="reading-book" value={bookId} disabled={busy || bookBusy} onChange={event => setBookId(event.target.value)}>
     <option value="">원서 선택 안 함</option>

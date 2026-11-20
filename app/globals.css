@@ -207,3 +207,15 @@
   color: #385c51;
   overflow-wrap: anywhere;
 }
+
+.readingBookPanel {
+  background: #cce9dd;
+  border-color: #a8d4c4;
+  color: #184c42;
+}
+
+.readingBookLabel {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
