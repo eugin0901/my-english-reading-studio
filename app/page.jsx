@@ -316,7 +316,10 @@ export default function Page(){
   </div>
   <div className="assessmentBody">
    <div className="assessmentScore"><strong>{readingAssessment.score}</strong><span> / 100점</span></div>
-   <p className="assessmentNote">학습용 점수예요.</p>
+   <p className="assessmentNote">
+    {readingAssessment.counts ? <>표 기준 · 정확 {readingAssessment.counts.correct}개, 부분 이해 {readingAssessment.counts.partial}개, 보완 필요 {readingAssessment.counts.incorrect}개</> : '학습용 점수예요.'}
+   </p>
+   {readingAssessment.counts && <p className="assessmentNote">정확은 1점, 부분 이해는 0.5점, 보완 필요는 0점으로 계산해 100점으로 환산한 학습용 점수예요.</p>}
    <dl>
     <div><dt>원문</dt><dd lang="en">{readingAssessment.source}</dd></div>
     <div><dt>내 해석</dt><dd>{readingAssessment.translation}</dd></div>
