@@ -284,3 +284,29 @@
   margin: .35rem 0;
   line-height: 1.5;
 }
+
+.dailyReviewLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  width: 100%;
+  min-height: 3.5rem;
+  padding: .85rem 1rem;
+  border: 1px solid #a8d4c4;
+  border-radius: .85rem;
+  background: #cce9dd;
+  color: #184c42;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dailyReviewLink:hover {
+  background: #bce2d1;
+}
+
+.dailyReviewLink:focus-visible {
+  outline: 2px solid #184c42;
+  outline-offset: 3px;
+}

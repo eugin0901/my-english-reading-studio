@@ -304,6 +304,14 @@ export default function Page(){
   </div>
  </section>}
   {chatPanel}
+  <button type="button" className="dailyReviewLink" onClick={() => {
+   setTab('skills');
+   setError('');
+   window.scrollTo(0, 0);
+  }}>
+   <RefreshCw size={20} aria-hidden="true"/>
+   <span>오늘의 한 문장 복습</span>
+  </button>
  </div>}
  {tab === 'skills' && <div className="studySections">
   {readingExercise ? <section className="panel readingExercise" aria-labelledby="reading-skill-title">
