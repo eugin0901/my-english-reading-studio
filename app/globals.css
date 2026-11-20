@@ -137,3 +137,17 @@
   font: inherit;
   resize: vertical;
 }
+
+.bubbleRow:has(.assistant) {
+  scroll-margin-block-start: 1rem;
+}
+
+.bubble.assistant .tutorReplyFallback {
+  white-space: pre-wrap;
+}
+
+.studySections {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
