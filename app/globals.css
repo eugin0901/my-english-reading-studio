@@ -1076,3 +1076,86 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .stats>div { padding:16px 14px;border-radius:15px; }
  .signInIntro:after { opacity:.16; }
 }
+
+:root {
+  --lime: #dff68b;
+  --lime-soft: #f3fbd7;
+  --lime-border: #d7e6a6;
+  --lime-ink: #34451c;
+}
+
+.sidebar nav button.active .navIcon {
+  background: var(--lime);
+  color: #20389e;
+}
+
+.studyHeroActions button {
+  background: var(--lime);
+  color: #17234b;
+}
+
+.studyHeroActions button:hover {
+  background: #ecffa9;
+}
+
+.studyHeroActions a {
+  background: #fff;
+  color: #2244bd;
+}
+
+.stats span svg {
+  width: 1.65rem;
+  height: 1.65rem;
+  padding: .28rem;
+  border-radius: .48rem;
+  background: #edf2ff;
+  color: #2244bd;
+}
+
+.stats > div:nth-child(odd) span svg {
+  background: var(--lime);
+  color: #34451c;
+}
+
+.readingBookPanel {
+  background: var(--lime-soft);
+  border-color: var(--lime-border);
+}
+
+.readingBookPanel .readingBookLabel {
+  color: var(--lime-ink);
+}
+
+.readingBookPanel .readingBookLabel svg {
+  color: #4b6021;
+}
+
+.readingBookPanel .secondary {
+  background: var(--lime);
+  border-color: #cada90;
+  color: #263916;
+}
+
+.sourcePanel {
+  border-color: #cbd8ff;
+  background: #f0f4ff;
+}
+
+.readingAssessment .panelHead {
+  background: var(--lime-soft);
+  color: var(--lime-ink);
+}
+
+.readingAssessment .panelHead svg {
+  color: #4b6021;
+}
+
+.dailyReviewLink {
+  background: var(--lime);
+  border-color: #cada90;
+  color: #263916;
+}
+
+.dailyReviewLink:hover {
+  background: #e9f9ad;
+}
