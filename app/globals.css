@@ -1083,30 +1083,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   box-shadow: none;
 }
 
-.studyHero {
-  background: linear-gradient(112deg, #dff68b, #eefac2);
+.studyHeroActions a[href="#reading-skills"] {
+  background: #dff68b;
   color: #202b58;
-  box-shadow: 0 12px 28px #516b221a;
 }
 
-.studyHero::before {
-  opacity: .14;
-  mix-blend-mode: multiply;
-}
-
-.studyHero::after {
-  background: linear-gradient(90deg, #dff68b 0%, #dff68bee 36%, transparent 82%);
-}
-
-.studyHero h1 {
-  color: #202b58;
-  text-shadow: none;
-}
-
-.studyHero p {
-  color: #354521;
-}
-
-.studyHeroActions :is(button, a):focus-visible {
-  outline-color: #283399;
+.studyHeroActions a[href="#reading-skills"]:hover {
+  background: #eaf9ad;
 }
