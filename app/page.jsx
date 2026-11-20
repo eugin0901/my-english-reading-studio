@@ -4,7 +4,7 @@ import Markdown from 'react-markdown';
 import Shadowing from './shadowing';
 import remarkGfm from 'remark-gfm';
 import {createClient} from '@supabase/supabase-js';
-import {BookCopy,BookOpen,MessageSquareText,ClipboardCheck,LibraryBig,ChartNoAxesColumnIncreasing,Send,RefreshCw,LogOut,CheckCircle2,AlertCircle} from 'lucide-react';
+import {BookCopy,BookOpen,Headphones,PencilLine,Activity,MessageSquareText,ClipboardCheck,LibraryBig,ChartNoAxesColumnIncreasing,Send,RefreshCw,LogOut,CheckCircle2,AlertCircle} from 'lucide-react';
 
 const tutorMarkup = ['p', 'h1', 'h2', 'h3', 'h4', 'strong', 'em', 'ul', 'ol', 'li', 'blockquote', 'br', 'code', 'del', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td'];
 
@@ -285,11 +285,25 @@ export default function Page(){
  const selected=data.quizzes.find(q=>q.id===quizId)||data.quizzes[0];
  const already=selected&&data.attempts.find(a=>a.quiz_id===selected.id);
  const stats={books:data.books.length,terms:data.terms.length,quizzes:data.attempts.length,score:data.attempts.length?Math.round(data.attempts.reduce((a,b)=>a+b.score,0)/data.attempts.length):0};
- if(!session)return <main className="login"><div className="brand"><div className="logo"><BookOpen/></div> MY ENGLISH READING STUDIO</div><div className="loginCard"><h1>로그인</h1><p>로그인하면 읽던 원서와 학습 기록을 이어서 볼 수 있어요.</p><button type="button" className="kakaoLogin" disabled={busy || kakaoBusy} onClick={signInWithKakao}>
+ if (!session) return <main className="login">
+  <div className="signInLayout">
+   <section className="signInIntro" aria-labelledby="studio-name">
+    <div className="brand"><div className="logo"><BookOpen aria-hidden="true"/></div><span>Reading Studio</span></div>
+    <div className="signInCopy">
+     <h2 id="studio-name" lang="en">My English<br/>Reading Studio</h2>
+     <p>원서 한 문장으로 해석, 작문, 발음을 연습하세요.</p>
+    </div>
+    <div className="signInIcons" aria-hidden="true">
+     <span><BookOpen size={32}/></span><span><Headphones size={32}/></span><span><PencilLine size={32}/></span>
+    </div>
+   </section>
+   <div className="loginCard"><h1>로그인</h1><p>로그인하면 읽던 원서와 학습 기록을 이어서 볼 수 있어요.</p><button type="button" className="kakaoLogin" disabled={busy || kakaoBusy} onClick={signInWithKakao}>
  {kakaoBusy ? '카카오 로그인 연결 중…' : '카카오로 로그인'}
- </button><form onSubmit={signIn}><label>이메일 로그인</label><input type="email" placeholder="you@example.com" required value={email} onChange={e=>setEmail(e.target.value)}/><button className="primary" disabled={busy || kakaoBusy}>{busy?'전송 중...':'로그인 링크 받기'}</button></form>{linkSent&&<div className="success">이메일에서 로그인 링크를 눌러 주세요.</div>}{error&&<p className="err" role="alert">{error}</p>}<small>이메일 로그인은 받은 메일의 링크를 열어 완료할 수 있어요.</small></div></main>;
+ </button><form onSubmit={signIn}><label>이메일 로그인</label><input type="email" placeholder="you@example.com" required value={email} onChange={e=>setEmail(e.target.value)}/><button className="primary" disabled={busy || kakaoBusy}>{busy?'전송 중...':'로그인 링크 받기'}</button></form>{linkSent&&<div className="success">이메일에서 로그인 링크를 눌러 주세요.</div>}{error&&<p className="err" role="alert">{error}</p>}<small>이메일 로그인은 받은 메일의 링크를 열어 완료할 수 있어요.</small></div>
+  </div>
+ </main>;
  const chatPanel = (
- <section className="panel studyPanel"><div className="panelHead"><div><MessageSquareText size={19}/><strong>AI 원서 선생님</strong></div></div><div className="chat">{data.messages.length===0&&<div className="welcome"><h2>문장에 대해 질문해 보세요</h2><div className="suggestions">{['It wasn’t that I disliked my job. 해석해줘','take time off와 get away from 차이','Ivy and Bean 문장 구조를 설명해줘'].map(s=><button key={s} onClick={()=>setMessage(s)}>{s}</button>)}</div></div>}{data.messages.map((m,i)=><div className={'bubbleRow '+(m.role==='user'?'mine':'')} key={m.id||i} ref={i === latestReplyIndex ? latestReply : null}><div className={'bubble '+m.role}>{m.role === 'assistant' ? <>
+ <section className="panel studyPanel"><div className="panelHead"><div><MessageSquareText size={19}/><strong>AI 원서 선생님</strong></div></div><div className="chat">{data.messages.length===0&&<div className="welcome"><div className="welcomeIcon" aria-hidden="true"><MessageSquareText size={25}/></div><h2>문장에 대해 질문해 보세요</h2><div className="suggestions">{['It wasn’t that I disliked my job. 해석해줘','take time off와 get away from 차이','Ivy and Bean 문장 구조를 설명해줘'].map(s=><button key={s} onClick={()=>setMessage(s)}>{s}</button>)}</div></div>}{data.messages.map((m,i)=><div className={'bubbleRow '+(m.role==='user'?'mine':'')} key={m.id||i} ref={i === latestReplyIndex ? latestReply : null}><div className={'bubble '+m.role}>{m.role === 'assistant' ? <>
  <TutorReply content={m.content}/>
  {tab === 'study' && i === exerciseReplyIndex && <div className="tutorPracticePreview">
   <h3 className="practicePreviewTitle">오늘의 읽기 기술</h3>
@@ -309,7 +323,22 @@ export default function Page(){
  </div>}
  </> : m.content}</div></div>)}{busy&&<div className="thinking">답변을 준비하고 학습 표현을 정리하는 중...</div>}</div><form className="compose" onSubmit={ask}><input value={message} disabled={busy} onChange={e=>setMessage(e.target.value)} aria-label="AI 원서 선생님에게 질문" placeholder="문장이나 표현에 대해 질문하세요" maxLength={2000}/><button className="primary send" type="submit" aria-label="질문 보내기" disabled={busy||!message.trim()}><Send size={18} aria-hidden="true"/></button></form><p className="note">학습 대화와 주요 영어 표현은 로그인 계정에 저장됩니다. 개인 비밀번호 등 민감정보는 입력하지 마세요.</p></section>
  );
- return <div className="app"><aside className="sidebar"><div className="brand"><div className="logo"><BookOpen size={20}/></div><span>My English Reading Studio</span></div><nav aria-label="학습 메뉴">{[['study',BookOpen,'영어 원서 공부'],['skills',BookOpen,'오늘의 읽기 기술'],['quiz',ClipboardCheck,'주간 복습시험'],['terms',LibraryBig,'단어·표현 노트'],['progress',ChartNoAxesColumnIncreasing,'학습 성적']].map(([id,Icon,label])=><button key={id} className={tab===id?'active':''} aria-current={tab===id ? 'page' : undefined} onClick={()=>{selectTab(id);setError('');setResult(null);setAnswers({});}}><Icon size={19}/>{label}</button>)}</nav><div className="sidebarBottom"><div className="profile"><div className="avatar">{session.user.email?.[0]?.toUpperCase()||'U'}</div><div><strong>{session.user.email || session.user.user_metadata?.name || "내 계정"}</strong></div></div><button onClick={()=>client().auth.signOut()}><LogOut size={16}/> 로그아웃</button></div></aside><main className="content"><div className="pageBody"><div className="heading"><h1>{tab==='study'?'영어 원서 공부':tab==='skills'?'오늘의 읽기 기술':tab==='quiz'?'이번 주 영어 복습시험':tab==='terms'?'단어·표현 노트':'학습 성적'}</h1><p>{tab==='study'?'읽고 있는 책에서 문장을 골라 해석해 보세요.':tab==='skills'?'예문을 해석하고 핵심 표현으로 새 문장을 써 보세요.':tab==='quiz'?'매주 일요일 오전 10시(한국시간)에 새 시험이 열립니다.':tab==='terms'?'AI 선생님과 공부하며 수집된 표현입니다.':'시험 응시 결과와 학습한 표현을 확인하세요.'}</p></div><div className="stats"><div><span>누적 학습 원서</span><strong>{stats.books}<small>권</small></strong></div><div><span>누적 학습 표현</span><strong>{stats.terms}<small>개</small></strong></div><div><span>완료한 시험</span><strong>{stats.quizzes}<small>회</small></strong></div><div><span>평균 점수</span><strong>{stats.score}<small>점</small></strong></div></div>{error&&<div className="error"><AlertCircle size={16}/>{error}<button onClick={()=>setError('')}>닫기</button></div>}
+ return <div className="app"><aside className="sidebar"><div className="brand"><div className="logo"><BookOpen size={20}/></div><span>My English Reading Studio</span></div><nav aria-label="학습 메뉴">{[['study',BookOpen,'영어 원서 공부'],['skills',BookOpen,'오늘의 읽기 기술'],['quiz',ClipboardCheck,'주간 복습시험'],['terms',LibraryBig,'단어·표현 노트'],['progress',ChartNoAxesColumnIncreasing,'학습 성적']].map(([id,Icon,label])=><button key={id} className={tab===id?'active':''} aria-current={tab===id ? 'page' : undefined} onClick={()=>{selectTab(id);setError('');setResult(null);setAnswers({});}}><span className="navIcon"><Icon size={19} aria-hidden="true"/></span>{label}</button>)}</nav><div className="sidebarBottom"><div className="profile"><div className="avatar">{session.user.email?.[0]?.toUpperCase()||'U'}</div><div><strong>{session.user.email || session.user.user_metadata?.name || "내 계정"}</strong></div></div><button onClick={()=>client().auth.signOut()}><LogOut size={16}/> 로그아웃</button></div></aside><main className="content"><div className="pageBody">
+ {tab === 'study' ? <header className="studyHero">
+  <div className="studyHeroCopy">
+   <h1>영어 원서 공부</h1>
+   <p>읽고 있는 책에서 한 문장을 골라 보세요.</p>
+   <div className="studyHeroActions">
+    <button type="button" onClick={() => document.getElementById('reading-source')?.focus()}>
+     <PencilLine size={18} aria-hidden="true"/> 원서 문장 입력
+    </button>
+    <a href="#reading-skills"><RefreshCw size={18} aria-hidden="true"/> 오늘의 복습</a>
+   </div>
+  </div>
+  <div className="studyHeroIcons" aria-hidden="true">
+   <span><BookOpen size={56}/></span><span><Headphones size={28}/></span><span><PencilLine size={27}/></span>
+  </div>
+ </header> : <div className="heading"><h1>{tab==='study'?'영어 원서 공부':tab==='skills'?'오늘의 읽기 기술':tab==='quiz'?'이번 주 영어 복습시험':tab==='terms'?'단어·표현 노트':'학습 성적'}</h1><p>{tab==='study'?'읽고 있는 책에서 문장을 골라 해석해 보세요.':tab==='skills'?'예문을 해석하고 핵심 표현으로 새 문장을 써 보세요.':tab==='quiz'?'매주 일요일 오전 10시(한국시간)에 새 시험이 열립니다.':tab==='terms'?'AI 선생님과 공부하며 수집된 표현입니다.':'시험 응시 결과와 학습한 표현을 확인하세요.'}</p></div>}<div className="stats"><div><span><BookCopy size={16} aria-hidden="true"/> 누적 학습 원서</span><strong>{stats.books}<small>권</small></strong></div><div><span><LibraryBig size={16} aria-hidden="true"/> 누적 학습 표현</span><strong>{stats.terms}<small>개</small></strong></div><div><span><ClipboardCheck size={16} aria-hidden="true"/> 완료한 시험</span><strong>{stats.quizzes}<small>회</small></strong></div><div><span><Activity size={16} aria-hidden="true"/> 평균 점수</span><strong>{stats.score}<small>점</small></strong></div></div>{error&&<div className="error"><AlertCircle size={16}/>{error}<button onClick={()=>setError('')}>닫기</button></div>}
  {tab==='study'&&<div className="studySections">
  <section className="panel bookPanel readingBookPanel">
   <label className="readingBookLabel" htmlFor="reading-book"><BookCopy size={19} aria-hidden="true"/><strong>원서 제목</strong></label>
@@ -331,7 +360,7 @@ export default function Page(){
  </section>
  <section className="panel sourcePanel">
   <div className="readingPractice">
-   <label htmlFor="reading-source"><strong>원서 문장 넣기</strong></label>
+   <label className="readingBookLabel" htmlFor="reading-source"><PencilLine size={19} aria-hidden="true"/><strong>원서 문장 넣기</strong></label>
    <textarea id="reading-source" lang="en" value={sourceText} disabled={busy} rows={3} maxLength={900}
     placeholder="읽고 있는 영어 원서 문장을 붙여넣으세요"
     onChange={event => {

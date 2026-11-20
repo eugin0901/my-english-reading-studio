@@ -706,3 +706,289 @@ body {
     border-top: 1px solid var(--border);
   }
 }
+
+:root {
+  --navy: #161a38;
+  --mint: #3949c6;
+  --bg: #f3f4ff;
+  --border: #dce0f3;
+  --muted: #525b78;
+}
+
+.signInLayout {
+  width: min(58rem, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: .8rem;
+}
+
+.signInIntro,
+.studyHero {
+  background: #303ec5;
+  color: #fff;
+  border-radius: 1.6rem;
+}
+
+.signInIntro {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 29rem;
+  padding: clamp(1.3rem, 4vw, 2.65rem);
+}
+
+.signInIntro .brand {
+  padding: 0;
+  font-size: .95rem;
+}
+
+.signInIntro .logo {
+  background: #dff68b;
+  color: #283399;
+}
+
+.signInCopy h2 {
+  margin: 0 0 .7rem;
+  font-size: clamp(2.1rem, 4.7vw, 3.3rem);
+  line-height: 1.02;
+  letter-spacing: -.045em;
+}
+
+.signInCopy p {
+  margin: 0;
+  color: #ebedff;
+}
+
+.signInIcons {
+  display: flex;
+  gap: .55rem;
+}
+
+.signInIcons span,
+.studyHeroIcons span {
+  display: grid;
+  place-items: center;
+  background: #dff68b;
+  color: #283399;
+  border-radius: 1rem;
+}
+
+.signInIcons span {
+  width: 3.65rem;
+  height: 3.65rem;
+}
+
+.signInIcons span:nth-child(2),
+.studyHeroIcons span:nth-child(2) {
+  background: #b5baff;
+}
+
+.signInIcons span:nth-child(3),
+.studyHeroIcons span:nth-child(3) {
+  background: #fff;
+}
+
+.signInLayout .loginCard {
+  width: 100%;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 1.6rem;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.sidebar {
+  background: #fff;
+}
+
+.sidebar nav button.active,
+.sidebar nav button:hover {
+  background: #eaecff;
+  color: #2739a9;
+}
+
+.navIcon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: .65rem;
+  color: #3848bc;
+  background: #f0f1ff;
+}
+
+.sidebar nav button.active .navIcon {
+  color: #fff;
+  background: #3949c6;
+}
+
+.studyHero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  overflow: hidden;
+  padding: clamp(1.35rem, 4vw, 2.65rem);
+  margin-bottom: 1rem;
+}
+
+.studyHero h1 {
+  font-size: clamp(1.9rem, 4.6vw, 3.1rem);
+  letter-spacing: -.055em;
+  line-height: 1.15;
+  margin-bottom: .5rem;
+}
+
+.studyHero p {
+  margin-bottom: 1.2rem;
+  color: #ebedff;
+}
+
+.studyHeroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem;
+}
+
+.studyHeroActions :is(button, a) {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 2.75rem;
+  padding: .6rem .9rem;
+  border: 1px solid transparent;
+  border-radius: .75rem;
+  background: #dff68b;
+  color: #20264a;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: .875rem;
+}
+
+.studyHeroActions a {
+  background: #fff;
+}
+
+.studyHeroActions :is(button, a):focus-visible {
+  outline-color: #fff;
+}
+
+.studyHeroIcons {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: auto auto;
+  gap: .6rem;
+  padding-inline: 1rem;
+}
+
+.studyHeroIcons span {
+  width: 3.75rem;
+  height: 3.75rem;
+}
+
+.studyHeroIcons span:first-child {
+  grid-row: span 2;
+  width: 8.1rem;
+  height: 8.1rem;
+  border-radius: 1.5rem;
+}
+
+.stats {
+  background: transparent;
+  border: 0;
+  gap: .6rem;
+}
+
+.stats > div {
+  border: 1px solid var(--border);
+  border-radius: .9rem;
+}
+
+.stats > div + div {
+  border-inline-start: 1px solid var(--border);
+}
+
+.stats span {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+
+.stats span svg,
+.sourcePanel label svg {
+  color: #3949c6;
+  flex-shrink: 0;
+}
+
+.panel {
+  border-radius: 1rem;
+}
+
+.readingBookPanel,
+.sourcePanel {
+  background: #fff;
+  color: var(--navy);
+}
+
+.sourcePanel textarea:focus,
+.practiceSentence textarea:focus {
+  border-color: #3949c6;
+}
+
+.readingAssessment .panelHead,
+.readingExercise .panelHead,
+.tutorTable th {
+  background: #eeefff;
+  color: #283399;
+}
+
+.secondary {
+  border-color: #d4d8f7;
+  background: #f2f3ff;
+  color: #283399;
+}
+
+.primary {
+  border-radius: .75rem;
+}
+
+.dailyReviewLink {
+  background: #e9ecff;
+  border-color: #d0d5fc;
+  color: #283399;
+}
+
+.dailyReviewLink:hover {
+  background: #dfe4ff;
+}
+
+@media (max-width: 760px) {
+  .signInLayout {
+    grid-template-columns: 1fr;
+    width: min(27rem, 100%);
+  }
+
+  .signInIntro {
+    min-height: 0;
+    gap: 1rem;
+  }
+
+  .signInIcons span {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .signInIcons svg {
+    width: 1.3rem;
+  }
+
+  .studyHeroIcons {
+    display: none;
+  }
+
+  .stats > div:nth-child(odd) {
+    border-inline-start: 1px solid var(--border);
+  }
+}
