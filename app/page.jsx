@@ -39,6 +39,7 @@ function noteWeekLabel(start) {
 }
 export default function Page(){
  const [session,setSession]=useState(null),[email,setEmail]=useState(''),[linkSent,setLinkSent]=useState(false),[tab,setTab]=useState('study');
+ const [kakaoBusy, setKakaoBusy] = useState(false);
  const [data,setData]=useState(empty),[busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState(''),[quizId,setQuizId]=useState(''),[answers,setAnswers]=useState({}),[result,setResult]=useState(null);
  const [bookId, setBookId] = useState('');
  const [bookFilter, setBookFilter] = useState('all');
@@ -124,7 +125,31 @@ export default function Page(){
   if (chat) chat.scrollTop += reply.getBoundingClientRect().top - chat.getBoundingClientRect().top;
   assessmentCard.current?.scrollIntoView({ block: 'start' });
  }, [readingAssessment]);
- async function signIn(e){e.preventDefault();setBusy(true);setError('');try{const {error}=await client().auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin}});if(error)throw error;setLinkSent(true);}catch(e){setError(e.message);}finally{setBusy(false);}}
+ async function signInWithKakao() {
+  if (busy || kakaoBusy) return;
+  setKakaoBusy(true);
+  setError('');
+  try {
+   const settings = await fetch(new URL('/auth/v1/settings', process.env.NEXT_PUBLIC_SUPABASE_URL), {
+    headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY },
+    cache: 'no-store',
+   });
+   if (!settings.ok) throw new Error('카카오 로그인 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+   const { external } = await settings.json();
+   if (!external?.kakao) throw new Error('카카오 로그인은 아직 연결 준비 중입니다. 이메일로 로그인할 수 있어요.');
+   const { data, error: loginError } = await client().auth.signInWithOAuth({
+    provider: 'kakao',
+    options: { redirectTo: window.location.origin, skipBrowserRedirect: true },
+   });
+   if (loginError || !data?.url) throw new Error('카카오 로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+   window.location.assign(data.url);
+  } catch (failure) {
+   setError(failure.message);
+   setKakaoBusy(false);
+  }
+ }
+
+ async function signIn(e){e.preventDefault();if(kakaoBusy)return;setBusy(true);setError('');try{const {error}=await client().auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin}});if(error)throw error;setLinkSent(true);}catch(e){setError(e.message);}finally{setBusy(false);}}
  async function createBook(event) {
   event.preventDefault();
   if (bookBusy || !bookTitle.trim()) return;
@@ -255,7 +280,9 @@ export default function Page(){
  const selected=data.quizzes.find(q=>q.id===quizId)||data.quizzes[0];
  const already=selected&&data.attempts.find(a=>a.quiz_id===selected.id);
  const stats={terms:data.terms.length,quizzes:data.attempts.length,score:data.attempts.length?Math.round(data.attempts.reduce((a,b)=>a+b.score,0)/data.attempts.length):0};
- if(!session)return <main className="login"><div className="brand"><div className="logo"><BookOpen/></div> MY ENGLISH READING STUDIO</div><div className="loginCard"><p className="eyebrow">PERSONAL READING COMPANION</p><h1>읽을수록 쌓이는<br/><span>나만의 영어 실력</span></h1><p>AI 영어 선생님과 원서를 공부하면 표현이 자동 저장되고, 매주 일요일 새 복습시험이 만들어집니다.</p><form onSubmit={signIn}><label>이메일 로그인</label><input type="email" placeholder="you@example.com" required value={email} onChange={e=>setEmail(e.target.value)}/><button className="primary" disabled={busy}>{busy?'전송 중...':'로그인 링크 받기'}</button></form>{linkSent&&<div className="success">이메일에서 로그인 링크를 눌러 주세요.</div>}{error&&<p className="err">{error}</p>}<small>로그인 링크는 Supabase 이메일 인증을 사용합니다. 서비스 배포 후 이메일 인증 설정이 필요합니다.</small></div><div className="footer">Study with intention · Review with confidence</div></main>;
+ if(!session)return <main className="login"><div className="brand"><div className="logo"><BookOpen/></div> MY ENGLISH READING STUDIO</div><div className="loginCard"><p className="eyebrow">PERSONAL READING COMPANION</p><h1>읽을수록 쌓이는<br/><span>나만의 영어 실력</span></h1><p>AI 영어 선생님과 원서를 공부하면 표현이 자동 저장되고, 매주 일요일 새 복습시험이 만들어집니다.</p><button type="button" className="kakaoLogin" disabled={busy || kakaoBusy} onClick={signInWithKakao}>
+ {kakaoBusy ? '카카오 로그인 연결 중…' : '카카오로 로그인'}
+ </button><form onSubmit={signIn}><label>이메일 로그인</label><input type="email" placeholder="you@example.com" required value={email} onChange={e=>setEmail(e.target.value)}/><button className="primary" disabled={busy || kakaoBusy}>{busy?'전송 중...':'로그인 링크 받기'}</button></form>{linkSent&&<div className="success">이메일에서 로그인 링크를 눌러 주세요.</div>}{error&&<p className="err" role="alert">{error}</p>}<small>이메일 로그인은 받은 메일의 링크를 열어 완료할 수 있어요.</small></div><div className="footer">Study with intention · Review with confidence</div></main>;
  const chatPanel = (
  <section className="panel studyPanel"><div className="panelHead"><div><MessageSquareText size={19}/><strong>AI 원서 선생님</strong></div></div><div className="chat">{data.messages.length===0&&<div className="welcome"><div className="welcomeIcon"><BookOpen size={26}/></div><h2>무엇을 읽고 있나요?</h2><p>읽다가 모르는 단어나 문장을 그대로 입력해 보세요.<br/>예: “I didn't understand her feelings until she explained them.” 에서 until의 의미는?</p><div className="suggestions">{['It wasn’t that I disliked my job. 해석해줘','take time off와 get away from 차이','Ivy and Bean 문장 구조를 설명해줘'].map(s=><button key={s} onClick={()=>setMessage(s)}>{s}</button>)}</div></div>}{data.messages.map((m,i)=><div className={'bubbleRow '+(m.role==='user'?'mine':'')} key={m.id||i} ref={i === latestReplyIndex ? latestReply : null}><div className={'bubble '+m.role}>{m.role === 'assistant' ? <>
  <TutorReply content={m.content}/>

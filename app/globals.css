@@ -401,3 +401,31 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.kakaoLogin {
+  width: 100%;
+  min-height: 3rem;
+  margin: 0 0 1rem;
+  padding: .75rem 1rem;
+  border: 1px solid #f4d900;
+  border-radius: .65rem;
+  background: #fee500;
+  color: #191919;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.kakaoLogin:hover:not(:disabled) {
+  background: #f8df00;
+}
+
+.kakaoLogin:focus-visible {
+  outline: 2px solid #184c42;
+  outline-offset: 3px;
+}
+
+.kakaoLogin:disabled {
+  opacity: .65;
+  cursor: wait;
+}
