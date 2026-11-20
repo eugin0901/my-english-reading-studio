@@ -125,6 +125,12 @@
   font-weight: 600;
 }
 
+.sourcePanel {
+  background: #e7f4ef;
+  border-color: #c6dfd7;
+  color: #184c42;
+}
+
 .practiceSentence textarea,
 .sourcePanel textarea {
   display: block;
