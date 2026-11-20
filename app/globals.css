@@ -1083,15 +1083,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   box-shadow: none;
 }
 
-.studyHeroActions a[href="#reading-skills"] {
-  background: #dff68b;
-  color: #202b58;
-}
-
-.studyHeroActions a[href="#reading-skills"]:hover {
-  background: #eaf9ad;
-}
-
 .dailyReviewLink {
   background: #dff68b;
   border-color: #c9df78;
@@ -1100,4 +1091,69 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 .dailyReviewLink:hover {
   background: #eaf9ad;
+}
+
+.studyHero {
+  min-height: 238px;
+  padding: 2.45rem clamp(1.25rem, 4vw, 2.65rem);
+  background: #303ec5;
+  box-shadow: none;
+}
+
+.studyHero::before,
+.studyHero::after {
+  content: none;
+}
+
+.studyHero h1 {
+  text-shadow: none;
+}
+
+.studyHeroActions :is(button, a) {
+  min-height: 44px;
+  padding: .55rem .9rem;
+  border-radius: .75rem;
+  color: #202b58;
+  box-shadow: none;
+}
+
+.studyHeroActions button {
+  background: #dff68b;
+}
+
+.studyHeroActions a {
+  background: #fff;
+}
+
+.studyHeroIcons {
+  display: grid;
+  padding-inline: 0 clamp(0rem, 2vw, 1rem);
+}
+
+@media (max-width: 520px) {
+  .studyHero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    min-height: 0;
+    padding-block: 1.35rem;
+  }
+
+  .studyHeroIcons {
+    grid-template-columns: repeat(3, auto);
+    gap: .45rem;
+  }
+
+  .studyHeroIcons span,
+  .studyHeroIcons span:first-child {
+    grid-row: auto;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: .65rem;
+  }
+
+  .studyHeroIcons svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
 }
