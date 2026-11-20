@@ -13,5 +13,5 @@ export async function GET(request) {
     // Never expose grading answers before submitting the quiz.
     const quizzes=q.data.map(x=>({id:x.id,title:x.title,week_key:x.week_key,created_at:x.created_at,questions:x.questions.map(({stem,options,sourceExpression})=>({stem,options,sourceExpression}))}));
     return Response.json({messages:m.data.reverse(),terms:t.data,quizzes,attempts:a.data});
-  } catch(e) { return jsonError(e); }
+  } catch(e) { return jsonError(e, 'bootstrap'); }
 }

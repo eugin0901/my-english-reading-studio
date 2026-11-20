@@ -16,13 +16,20 @@
 ## 배포하기 — 처음 한 번만
 
 1. [Supabase](https://supabase.com/)에서 프로젝트 생성. **Authentication → Providers → Email** 활성화, 이메일 OTP 로그인 사용 가능하도록 설정.
-2. Supabase **SQL Editor**에서 `supabase/schema.sql` 전체 실행.
+2. 신규 DB는 Supabase **SQL Editor**에서 `supabase/schema.sql`을 먼저 실행합니다. 신규 및 기존 DB 모두 코드 배포 전에 [저장 마이그레이션](supabase/migrations/20261120_atomic_learning_writes.sql)을 실행합니다.
 3. Supabase **Project URL**과 **Publishable key**, **Secret key** 확인. Secret key는 서버에서만 사용합니다. 기존 프로젝트에 따라 `service_role` 키를 대체값으로 사용할 수 있지만 새 secret key 사용을 권장합니다.
 4. 이 폴더를 GitHub **비공개 저장소**에 업로드하고 [Vercel](https://vercel.com/)로 Import Project → Next.js 선택.
 5. Vercel 환경변수에 `.env.example`의 여섯 값을 등록. `CRON_SECRET`은 32자 이상의 무작위 문자열로 설정합니다. API 키는 반드시 **Vercel 서버 환경변수**로만 등록하고 코드나 GitHub에 넣지 않습니다.
 6. Deploy 후 Supabase **Authentication → URL Configuration**에서 Site URL을 실제 배포 주소로 설정하고, Redirect URLs에도 `https://YOUR-DOMAIN/**`를 추가.
 7. 배포된 주소에서 자신의 이메일로 로그인 → 영어 문장 질문 → 표현 자동 저장 확인.
 8. Vercel 프로젝트에서 Cron을 활성화. `vercel.json`의 `0 1 * * 0`은 **일요일 01:00 UTC = 일요일 10:00 한국시간**입니다. 호스팅 요금제에 따라 예약 작업 실행 시점에 오차가 있을 수 있습니다.
+
+## 운영 오류 확인
+
+- Vercel Logs의 `Request failed` 항목에서 `operation`과 `code`를 확인합니다. 예를 들어 `study.openai`는 AI 요청, `study.save`는 DB 저장 단계입니다.
+- `AI_CONFIGURATION` 또는 `AI_ACCESS`는 Production의 `OPENAI_API_KEY`와 OpenAI 프로젝트 권한을 확인합니다. `AI_QUOTA`는 OpenAI 프로젝트 결제 상태와 사용 한도를 확인합니다. `AI_MODEL` 또는 `AI_REQUEST`는 `OPENAI_MODEL`의 모델명, 접근 권한, Responses API 구조화 출력 지원 여부를 확인합니다.
+- `DB_MIGRATION_REQUIRED`는 대상 Supabase 프로젝트에 저장 마이그레이션을 적용했는지 확인합니다.
+- Vercel에서 환경변수를 바꾼 뒤에는 Production에 다시 배포합니다. Cron은 Production에서 해당 프로젝트의 요금제, 등록 상태, 실행 로그 및 `CRON_SECRET` 설정을 확인합니다.
 
 ## 로컬 실행
 

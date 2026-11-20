@@ -11,10 +11,15 @@ export async function GET(request) {
     const {data:users,error}=await db.from('profiles').select('id').order('created_at',{ascending:true}).limit(10);
     if(error) throw error;
     const results=[];
+    const date = new Date();
     for(const user of users||[]) {
-      try {results.push({user:user.id,...await generateForUser(db,user.id)});}
-      catch(e){results.push({user:user.id,error:e.message});}
+      try {results.push({user:user.id,...await generateForUser(db,user.id,date)});}
+      catch(e){
+        const failure = jsonError(e, 'cron.generate');
+        results.push({error:(await failure.json()).code});
+      }
     }
-    return Response.json({ok:results.every(x=>!x.error),results});
-  }catch(e){return jsonError(e);}
+    const ok = results.every(x=>!x.error);
+    return Response.json({ok,results}, {status:ok ? 200 : 500});
+  }catch(e){return jsonError(e, 'cron.sunday');}
 }
