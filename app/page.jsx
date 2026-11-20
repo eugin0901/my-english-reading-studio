@@ -45,6 +45,8 @@ export default function Page(){
  const visibleHints = hintResult?.source === ownSource ? hintResult : null;
  const [practiceOpen, setPracticeOpen] = useState(true);
  const [readingAssessment, setReadingAssessment] = useState(null);
+ const [exerciseTranslation, setExerciseTranslation] = useState('');
+ const [exerciseComposition, setExerciseComposition] = useState('');
  const assessmentCard = useRef(null);
  const latestReply = useRef(null);
  const studySequence = useRef(0);
@@ -75,7 +77,7 @@ export default function Page(){
    setError(failure.message);
   }
  }
- useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setBookId('');setBookFilter('all');setBookTitle('');setAddingBook(false);setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);setReadingAssessment(null);}},[token]);
+ useEffect(()=>{if(token){reload();}else{setData(empty);setQuizId('');setBookId('');setBookFilter('all');setBookTitle('');setAddingBook(false);setPracticeOpen(true);setSourceText('');setOwnTranslation('');setHintResult(null);setReadingAssessment(null);setExerciseTranslation('');setExerciseComposition('');}},[token]);
  useEffect(() => {
   if (replyVersion) latestReply.current?.scrollIntoView({ block: 'start' });
  }, [replyVersion]);
@@ -121,7 +123,7 @@ export default function Page(){
   }
  }
 
- async function sendStudy(input, assessmentInput) {
+ async function sendStudy(input, assessmentInput, studyBookId = bookId) {
   if (!input || busy) return false;
   const sequence = ++studySequence.current;
   const pendingId = 'study-' + sequence;
@@ -131,7 +133,7 @@ export default function Page(){
    ...current, messages: [...current.messages, { role: 'user', content: input, id: pendingId }],
   }));
   try {
-   const reply = await api('/api/study', 'POST', { message: input, ...(bookId ? { bookId } : {}), ...(assessmentInput ? { readingAssessment: true } : {}) });
+   const reply = await api('/api/study', 'POST', { message: input, ...(studyBookId ? { bookId: studyBookId } : {}), ...(assessmentInput ? { readingAssessment: true } : {}) });
    setData(current => ({
     ...current,
     messages: [
@@ -141,7 +143,9 @@ export default function Page(){
    }));
    await reload(reply.answer);
    if (assessmentInput && reply.assessment) {
-    setReadingAssessment({ ...assessmentInput, ...reply.assessment });
+    setExerciseTranslation('');
+    setExerciseComposition('');
+    setReadingAssessment({ ...assessmentInput, ...reply.assessment, bookId: studyBookId });
    } else {
     setReplyVersion(sequence);
    }
@@ -182,9 +186,26 @@ export default function Page(){
   await sendStudy(input, { source: ownSource, translation });
  }
 
+ async function submitReadingExercise(event) {
+  event.preventDefault();
+  const exercise = readingAssessment?.practice;
+  const translation = exerciseTranslation.trim();
+  const composition = exerciseComposition.trim();
+  if (!exercise || !translation || !composition) return;
+  const input = [
+   '한 문장 연습 답안. 예문 해석과 영어 작문을 각각 평가해줘.',
+   '예문: ' + exercise.example,
+   '내 예문 해석: ' + translation,
+   '지정 표현: ' + exercise.expression,
+   '내 영어 작문: ' + composition,
+  ].join('\n');
+  await sendStudy(input, null, readingAssessment.bookId);
+ }
+
  async function generate(){setBusy(true);setError('');try{await api('/api/quiz/generate','POST',{});await reload();setTab('quiz');}catch(e){setError(e.message);}finally{setBusy(false);}}
  async function submit(){const q=selected;if(!q)return;const vals=q.questions.map((_,i)=>answers[i]);if(vals.some(x=>!Number.isInteger(x))){setError('모든 문제에 답해 주세요.');return;}setBusy(true);setError('');try{const r=await api('/api/quiz/submit','POST',{quizId:q.id,answers:vals});setResult(r);await reload();}catch(e){setError(e.message);}finally{setBusy(false);}}
  const latestReplyIndex = data.messages.map(item => item.role).lastIndexOf('assistant');
+ const readingExercise = readingAssessment?.practice;
  const books = data.books;
  const bookTitles = new Map(books.map(book => [book.id, book.title]));
  const filteredTerms = data.terms.filter(term => {
@@ -273,7 +294,36 @@ export default function Page(){
    </dl>
   </div>
  </section>}
- <section className="panel studyPanel"><div className="panelHead"><div><MessageSquareText size={19}/><strong>AI 원서 선생님</strong></div></div><div className="chat">{data.messages.length===0&&<div className="welcome"><div className="welcomeIcon"><BookOpen size={26}/></div><h2>무엇을 읽고 있나요?</h2><p>읽다가 모르는 단어나 문장을 그대로 입력해 보세요.<br/>예: “I didn't understand her feelings until she explained them.” 에서 until의 의미는?</p><div className="suggestions">{['It wasn’t that I disliked my job. 해석해줘','take time off와 get away from 차이','Ivy and Bean 문장 구조를 설명해줘'].map(s=><button key={s} onClick={()=>setMessage(s)}>{s}</button>)}</div></div>}{data.messages.map((m,i)=><div className={'bubbleRow '+(m.role==='user'?'mine':'')} key={m.id||i} ref={i === latestReplyIndex ? latestReply : null}><div className={'bubble '+m.role}>{m.role === 'assistant' ? <TutorReply content={m.content}/> : m.content}</div></div>)}{busy&&<div className="thinking">답변을 준비하고 학습 표현을 정리하는 중...</div>}</div><form className="compose" onSubmit={ask}><input value={message} disabled={busy} onChange={e=>setMessage(e.target.value)} placeholder="공부하고 싶은 단어·문장·질문을 입력하세요..." maxLength={2000}/><button className="primary send" type="submit" disabled={busy||!message.trim()}><Send size={18}/></button></form><p className="note">학습 대화와 주요 영어 표현은 로그인 계정에 저장됩니다. 개인 비밀번호 등 민감정보는 입력하지 마세요.</p></section></div>}
+ <section className="panel studyPanel"><div className="panelHead"><div><MessageSquareText size={19}/><strong>AI 원서 선생님</strong></div></div><div className="chat">{data.messages.length===0&&<div className="welcome"><div className="welcomeIcon"><BookOpen size={26}/></div><h2>무엇을 읽고 있나요?</h2><p>읽다가 모르는 단어나 문장을 그대로 입력해 보세요.<br/>예: “I didn't understand her feelings until she explained them.” 에서 until의 의미는?</p><div className="suggestions">{['It wasn’t that I disliked my job. 해석해줘','take time off와 get away from 차이','Ivy and Bean 문장 구조를 설명해줘'].map(s=><button key={s} onClick={()=>setMessage(s)}>{s}</button>)}</div></div>}{data.messages.map((m,i)=><div className={'bubbleRow '+(m.role==='user'?'mine':'')} key={m.id||i} ref={i === latestReplyIndex ? latestReply : null}><div className={'bubble '+m.role}>{m.role === 'assistant' ? <TutorReply content={m.content}/> : m.content}</div></div>)}{busy&&<div className="thinking">답변을 준비하고 학습 표현을 정리하는 중...</div>}</div><form className="compose" onSubmit={ask}><input value={message} disabled={busy} onChange={e=>setMessage(e.target.value)} placeholder="공부하고 싶은 단어·문장·질문을 입력하세요..." maxLength={2000}/><button className="primary send" type="submit" disabled={busy||!message.trim()}><Send size={18}/></button></form><p className="note">학습 대화와 주요 영어 표현은 로그인 계정에 저장됩니다. 개인 비밀번호 등 민감정보는 입력하지 마세요.</p></section>
+ {readingExercise && <section className="panel readingExercise" aria-labelledby="reading-skill-title">
+  <div className="panelHead">
+   <div><BookOpen size={19}/><h2 id="reading-skill-title">오늘의 읽기 기술</h2></div>
+  </div>
+  <form className="readingPractice" onSubmit={submitReadingExercise}>
+   <h3>{readingExercise.skill}</h3>
+   <p>{readingExercise.tip}</p>
+   <div className="practiceSentence">
+    <h4>한 문장 연습</h4>
+    <p className="practiceEnglish" lang="en">{readingExercise.example}</p>
+    <label htmlFor="exercise-translation">예문 해석</label>
+    <textarea id="exercise-translation" rows={3} maxLength={700} required disabled={busy}
+     value={exerciseTranslation} onChange={event => setExerciseTranslation(event.target.value)}
+     placeholder="영어 예문을 한국어로 해석해 보세요"/>
+   </div>
+   <div className="practiceSentence">
+    <label htmlFor="exercise-composition">영어 문장 만들기</label>
+    <p id="exercise-expression"><strong lang="en">{readingExercise.expression}</strong>를 사용해 새로운 영어 문장을 써 보세요.</p>
+    <textarea id="exercise-composition" aria-describedby="exercise-expression" lang="en" rows={3} maxLength={700}
+     required disabled={busy} value={exerciseComposition}
+     onChange={event => setExerciseComposition(event.target.value)}
+     placeholder="Write your own sentence in English."/>
+   </div>
+   <button className="primary" disabled={busy || !exerciseTranslation.trim() || !exerciseComposition.trim()}>
+    {busy ? '피드백 준비 중…' : '해석·작문 피드백 받기'}
+   </button>
+  </form>
+ </section>}
+ </div>}
  {tab==='quiz'&&<section className="panel"><div className="panelHead"><div><ClipboardCheck size={19}/><strong>Weekly Review</strong></div><button className="secondary" onClick={generate} disabled={busy}><RefreshCw size={15}/>{busy?'생성 중...':'이번 주 시험 만들기'}</button></div>{!data.quizzes.length?<div className="empty"><BookOpen size={34}/><h3>아직 시험이 없습니다.</h3><p>영어 공부를 시작한 후 ‘이번 주 시험 만들기’를 눌러 보세요.<br/>매주 일요일에도 자동 생성됩니다.</p></div>:<><div className="quizSelect"><label>시험 선택</label><select value={selected?.id||''} onChange={e=>{setQuizId(e.target.value);setAnswers({});setResult(null);}}>{data.quizzes.map(q=><option value={q.id} key={q.id}>{q.week_key} · {q.title}</option>)}</select></div>{already&&!result?<div className="submitted"><CheckCircle2 size={24}/><h3>이미 응시한 시험입니다.</h3><p>점수: <strong>{already.score}점</strong> · 다른 주의 시험을 선택하거나 학습 성적 탭을 확인하세요.</p></div>:result?<div className="results"><div className="scoreCard"><CheckCircle2 size={28}/><span>이번 시험 점수</span><strong>{result.score}<small> / 100</small></strong></div>{result.detail.map((d,i)=><div className={'answerCard '+(d.correct?'correct':'wrong')} key={i}><b>{i+1}. {d.stem}</b><p>{d.correct?'✓ 정답입니다.':'✗ 오답입니다.'} 정답: {selected.questions[i].options[d.correctIndex]}</p><div>{d.explanation}</div></div>)}</div>:<div className="questions">{selected.questions.map((q,i)=><div className="question" key={i}><div className="qNum">QUESTION {String(i+1).padStart(2,'0')}</div><h3>{q.stem}</h3><div className="options">{q.options.map((o,j)=><button key={j} className={answers[i]===j?'picked':''} onClick={()=>setAnswers(a=>({...a,[i]:j}))}><span>{'ABCD'[j]}</span>{o}</button>)}</div></div>)}<button className="primary submit" onClick={submit} disabled={busy}>시험 제출하고 채점받기</button></div>}</>}</section>}
  {tab==='terms'&&<section className="panel">
   <div className="panelHead"><div><LibraryBig size={19}/><strong>단어·표현 노트</strong></div><span className="pill">{filteredTerms.length}개</span></div>

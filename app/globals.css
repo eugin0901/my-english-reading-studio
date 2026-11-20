@@ -265,3 +265,22 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.readingExercise .panelHead {
+  background: #e7f4ef;
+  color: #184c42;
+}
+.readingExercise .panelHead h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+.readingExercise :is(h3, h4) {
+  margin: 0 0 .5rem;
+}
+.readingExercise .practiceEnglish {
+  margin-bottom: .8rem;
+}
+.readingExercise #exercise-expression {
+  margin: .35rem 0;
+  line-height: 1.5;
+}
