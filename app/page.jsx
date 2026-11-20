@@ -139,7 +139,12 @@ export default function Page(){
    if (!external?.kakao) throw new Error('카카오 로그인은 아직 연결 준비 중입니다. 이메일로 로그인할 수 있어요.');
    const { data, error: loginError } = await client().auth.signInWithOAuth({
     provider: 'kakao',
-    options: { redirectTo: window.location.origin, skipBrowserRedirect: true },
+    options: {
+     redirectTo: window.location.origin,
+     skipBrowserRedirect: true,
+     // Use the Kakao app's configured consent items instead of Supabase's default email scope.
+     queryParams: { scope: '' },
+    },
    });
    if (loginError || !data?.url) throw new Error('카카오 로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.');
    window.location.assign(data.url);
