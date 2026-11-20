@@ -249,15 +249,16 @@ export default function Page(){
  <section className="panel studyPanel"><div className="panelHead"><div><MessageSquareText size={19}/><strong>AI 원서 선생님</strong></div></div><div className="chat">{data.messages.length===0&&<div className="welcome"><div className="welcomeIcon"><BookOpen size={26}/></div><h2>무엇을 읽고 있나요?</h2><p>읽다가 모르는 단어나 문장을 그대로 입력해 보세요.<br/>예: “I didn't understand her feelings until she explained them.” 에서 until의 의미는?</p><div className="suggestions">{['It wasn’t that I disliked my job. 해석해줘','take time off와 get away from 차이','Ivy and Bean 문장 구조를 설명해줘'].map(s=><button key={s} onClick={()=>setMessage(s)}>{s}</button>)}</div></div>}{data.messages.map((m,i)=><div className={'bubbleRow '+(m.role==='user'?'mine':'')} key={m.id||i} ref={i === latestReplyIndex ? latestReply : null}><div className={'bubble '+m.role}>{m.role === 'assistant' ? <>
  <TutorReply content={m.content}/>
  {tab === 'study' && i === exerciseReplyIndex && <div className="tutorPracticePreview">
-  <h3>오늘의 읽기 기술 · {readingExercise.skill}</h3>
+  <h3 className="practicePreviewTitle">오늘의 읽기 기술</h3>
+  <p><strong>{readingExercise.skill}</strong></p>
+  <p>{readingExercise.tip}</p>
   <h4>해석 연습</h4>
-  <ol lang="en">{[readingExercise.example, ...(readingExercise.extraReadingExamples || [])].map((sentence, index) =>
-   <li key={index}>{sentence}</li>)}</ol>
-  <p>{readingExercise.tip} 첫 번째 예문을 복습 화면에서 자연스러운 한국어로 옮겨 보세요.</p>
+  <ol className="bilingualExamples">{readingExercise.readingExamples?.map(({ english, korean }, index) =>
+   <li key={index}><strong lang="en">{english}</strong><span>{korean}</span></li>)}</ol>
   <h4>작문 연습</h4>
-  <p><strong lang="en">{readingExercise.expression}</strong>를 사용해 새로운 영어 문장을 써 보세요. {readingExercise.compositionTip}</p>
-  <ol lang="en">{readingExercise.writingExamples?.map((sentence, index) =>
-   <li key={index}>{sentence}</li>)}</ol>
+  <p><strong lang="en">{readingExercise.expression}</strong>를 사용한 예문입니다.</p>
+  <ol className="bilingualExamples">{readingExercise.writingExamples?.map(({ english, korean }, index) =>
+   <li key={index}><strong>{korean}</strong><span lang="en">{english}</span></li>)}</ol>
   <a href="#reading-skills" className="dailyReviewLink">
    <RefreshCw size={18} aria-hidden="true"/>
    <span>오늘의 한 문장 복습</span>

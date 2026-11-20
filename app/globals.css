@@ -336,3 +336,21 @@
   margin-top: .9rem;
   text-decoration: none;
 }
+
+.bubble.assistant .tutorPracticePreview .practicePreviewTitle,
+.readingExercise .panelHead h2 {
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  line-height: 1.3;
+}
+
+.bilingualExamples > li {
+  padding-block: .25rem;
+}
+
+.bilingualExamples > li > :is(strong, span) {
+  display: block;
+}
+
+.bilingualExamples > li > span {
+  color: #385c51;
+}
