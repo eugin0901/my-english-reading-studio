@@ -148,7 +148,7 @@ export default function Page(){
  </section>
  <section className="panel">
   <div className="panelHead">
-   <div><BookOpen size={19}/><strong>먼저 해석하기</strong></div>
+   <div><BookOpen size={19}/><strong>먼저 해석하기 : 스스로 해석해봐!</strong></div>
    <button type="button" className="secondary" disabled={busy} aria-expanded={practiceOpen} aria-controls="reading-practice"
     onClick={() => setPracticeOpen(open => !open)}>
     {practiceOpen ? '접기' : '펼치기'}
