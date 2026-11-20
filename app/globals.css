@@ -125,7 +125,8 @@
   font-weight: 600;
 }
 
-.practiceSentence textarea {
+.practiceSentence textarea,
+.sourcePanel textarea {
   display: block;
   width: 100%;
   margin-top: .55rem;
