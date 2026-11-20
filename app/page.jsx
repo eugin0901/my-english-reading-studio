@@ -326,13 +326,14 @@ export default function Page(){
  return <div className="app"><aside className="sidebar"><div className="brand"><div className="logo"><BookOpen size={20}/></div><span>My English Reading Studio</span></div><nav aria-label="학습 메뉴">{[['study',BookOpen,'영어 원서 공부'],['skills',BookOpen,'오늘의 읽기 기술'],['quiz',ClipboardCheck,'주간 복습시험'],['terms',LibraryBig,'단어·표현 노트'],['progress',ChartNoAxesColumnIncreasing,'학습 성적']].map(([id,Icon,label])=><button key={id} className={tab===id?'active':''} aria-current={tab===id ? 'page' : undefined} onClick={()=>{selectTab(id);setError('');setResult(null);setAnswers({});}}><span className="navIcon"><Icon size={19} aria-hidden="true"/></span>{label}</button>)}</nav><div className="sidebarBottom"><div className="profile"><div className="avatar">{session.user.email?.[0]?.toUpperCase()||'U'}</div><div><strong>{session.user.email || session.user.user_metadata?.name || "내 계정"}</strong></div></div><button onClick={()=>client().auth.signOut()}><LogOut size={16}/> 로그아웃</button></div></aside><main className="content"><div className="pageBody">
  {tab === 'study' ? <header className="studyHero">
   <div className="studyHeroCopy">
-   <h1>영어 원서 공부</h1>
-   <p>읽고 있는 책에서 한 문장을 골라 보세요.</p>
+   <div className="heroKicker"><span className="heroSpark">✦</span> YOUR READING JOURNEY</div>
+   <h1>오늘도 영어 원서<br/>한 페이지!</h1>
+   <p>읽고 · 배우고 · 복습하면서 나만의 영어 실력을 쌓아가요.</p>
    <div className="studyHeroActions">
     <button type="button" onClick={() => document.getElementById('reading-source')?.focus()}>
-     <PencilLine size={18} aria-hidden="true"/> 원서 문장 입력
+     <PencilLine size={18} aria-hidden="true"/> 오늘의 원서 공부
     </button>
-    <a href="#reading-skills"><RefreshCw size={18} aria-hidden="true"/> 오늘의 복습</a>
+    <button type="button" className="heroSecondary" onClick={() => selectTab('quiz')}><ClipboardCheck size={18} aria-hidden="true"/> 이번 주 복습시험</button>
    </div>
   </div>
   <div className="studyHeroIcons" aria-hidden="true">
